@@ -1,0 +1,38 @@
+#cloud-config
+# vim: syntax=yaml
+#
+
+# The current version of cloud-init in the Hypriot rpi-64 is 0.7.6
+# When dealing with cloud-init, it is SUPER important to know the version
+# I have wasted many hours creating servers to find out the module I was trying to use wasn't in the cloud-init version I had
+# Documentation: http://cloudinit.readthedocs.io/en/0.7.9/index.html
+
+hostname: REPLACE_WITH_HOSTNAME
+manage_etc_hosts: true
+
+users:
+  - name: k8s
+    gecos: "k8s"
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    groups: users,docker,video,input
+    lock_passwd: true
+    ssh_import_id: None
+    ssh_pwauth: no
+    ssh_authorized_keys:
+      - "REPLACE_WITH_PUB_KEY"
+
+locale: "en_US.UTF-8"
+
+package_upgrade: false
+
+packages:
+  # Host is able to resolve .local addresses
+  - libnss-mdns
+
+# These commands will be ran once on first boot only
+runcmd:
+  # Pickup the hostname changes
+  - 'systemctl restart avahi-daemon'
+
+package_upgrade: false

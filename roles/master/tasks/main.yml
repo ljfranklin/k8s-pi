@@ -1,0 +1,31 @@
+---
+- name: reset master
+  become: yes
+  become_user: root
+  shell: kubeadm reset -f
+- name: init k8s
+  become: yes
+  become_user: root
+  shell: kubeadm init --pod-network-cidr 10.244.0.0/16
+- name: create config directory
+  file:
+    path: "{{ansible_env.HOME}}/.kube/"
+    state: directory
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+    mode: 0755
+- name: copy admin.conf
+  become: yes
+  become_user: root
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ansible_env.HOME}}/.kube/config"
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+    mode: 0755
+    remote_src: yes
+  # pinned due to https://github.com/coreos/flannel/issues/1044
+- name: install flannel CNI plugin
+  shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+- register: join_cmd
+  shell: kubeadm token create --print-join-command

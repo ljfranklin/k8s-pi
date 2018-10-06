@@ -1,0 +1,23 @@
+---
+- name: test connection
+  ping:
+- name: add apt gpg key
+  become: yes
+  become_user: root
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+- name: add apt repo
+  become: yes
+  become_user: root
+  apt_repository:
+    repo: deb http://apt.kubernetes.io kubernetes-xenial main
+- name: install k8s-cni (got apt error without this...)
+  become: yes
+  become_user: root
+  apt:
+    name: kubernetes-cni=0.6.0-00
+- name: install kubeadm
+  become: yes
+  become_user: root
+  apt:
+    name: kubeadm

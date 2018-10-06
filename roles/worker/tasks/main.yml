@@ -1,0 +1,9 @@
+---
+- name: reset worker
+  become: yes
+  become_user: root
+  shell: kubeadm reset -f
+- name: join cluster
+  become: yes
+  become_user: root
+  shell: "{{ hostvars[groups['master'][0]]['join_cmd']['stdout'] }}"

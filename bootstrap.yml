@@ -1,0 +1,14 @@
+---
+- hosts: all
+  any_errors_fatal: true
+  roles:
+    - common
+
+- hosts: master
+  any_errors_fatal: true
+  roles:
+    - master
+
+- hosts: workers
+  roles:
+    - worker
