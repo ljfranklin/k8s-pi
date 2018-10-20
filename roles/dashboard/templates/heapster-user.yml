@@ -1,0 +1,52 @@
+---
+# https://github.com/kubernetes/heapster/issues/1936#issuecomment-410271976
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: heapster-custom-fix
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: heapster-custom-fix
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - nodes
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - deployments
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes/stats
+  verbs:
+  - create
+  - get
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: heapster-custom-fix
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: heapster-custom-fix
+subjects:
+- kind: ServiceAccount
+  name: heapster-custom-fix
+  namespace: kube-system

@@ -1,0 +1,48 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "dns-updater.fullname" . }}
+  app.kubernetes.io/name: {{ include "dns-updater.name" . }}
+  helm.sh/chart: {{ include "dns-updater.chart" . }}
+  app.kubernetes.io/instance: {{ .Release.Name }}
+  app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  schedule: "{{ .Values.schedule }}"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "dns-updater.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      template:
+        spec:
+          containers:
+          - name: {{ .Chart.Name }}
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command:
+              - "/scripts/update-cloudflare-dns.sh"
+              - "{{ .Values.cloudflare.zone }}"
+              - "{{ .Values.domains | join "," }}"
+            env:
+            - name: CLOUDFLARE_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare
+                  key: email
+            - name: CLOUDFLARE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare
+                  key: api_token
+            volumeMounts:
+            - name: config-volume
+              mountPath: /scripts
+          restartPolicy: Never
+          volumes:
+          - name: config-volume
+            configMap:
+              name: {{ .Release.Name }}-scripts
+              defaultMode: 0755

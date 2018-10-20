@@ -1,0 +1,18 @@
+serviceType: NodePort
+externalIP: {{ ansible_default_ipv4.address }}
+replicas: 1
+rbac:
+  enabled: true
+# force controller to run on master node
+nodeSelector:
+  node-role.kubernetes.io/master: ""
+tolerations:
+- key: node-role.kubernetes.io/master
+  effect: NoSchedule
+ssl:
+  enabled: true
+  enforced: true
+  # dashboard uses self-signed certs
+  insecureSkipVerify: true
+  defaultCert: {{ ingress.cert | b64encode }}
+  defaultKey: {{ ingress.key | b64encode }}

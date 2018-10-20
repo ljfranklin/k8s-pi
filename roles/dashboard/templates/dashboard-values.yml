@@ -1,0 +1,17 @@
+---
+image:
+  repository: k8s.gcr.io/kubernetes-dashboard-arm
+rbac:
+  create: true
+serviceAccount:
+  create: true
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: traefik
+  hosts:
+    - k8s.batcomputer.io
+  tls:
+    - secretName: letsencrypt-batcomputer-io
+livenessProbe:
+  initialDelaySeconds: 120

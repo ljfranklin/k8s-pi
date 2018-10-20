@@ -1,0 +1,8 @@
+---
+schedule: "*/5 * * * *"
+cloudflare:
+  email: "{{ cloudflare.email }}"
+  api_token: "{{ cloudflare.api_token }}"
+  zone: "{{ cloudflare.zone }}"
+domains:
+  - "{{ cloudflare.domain }}"

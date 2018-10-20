@@ -1,14 +1,22 @@
 ---
-- hosts: all
-  any_errors_fatal: true
-  roles:
-    - common
+# - hosts: all
+#   any_errors_fatal: true
+#   roles:
+#     - common
+
+# - hosts: master
+#   any_errors_fatal: true
+#   roles:
+#     - master
+
+# - hosts: workers
+#   roles:
+#     - worker
 
 - hosts: master
   any_errors_fatal: true
   roles:
-    - master
-
-- hosts: workers
-  roles:
-    - worker
+    - k8s-module
+    - helm
+    - ingress
+    - dashboard

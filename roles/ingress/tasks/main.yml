@@ -1,0 +1,39 @@
+---
+- name: template traefik config file
+  template:
+    src: ./traefik-values.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: install traefik
+  shell: >
+    helm upgrade
+    --install
+    --namespace kube-system
+    --values /tmp/traefik-values.yml
+    traefik
+    stable/traefik
+
+- name: copy dns-updater chart
+  copy:
+    src: ../../../dns-updater
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: template dns-updater config file
+  template:
+    src: ./dns-updater-values.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: install dns-updater
+  shell: >
+    helm upgrade
+    --install
+    --namespace kube-system
+    --values /tmp/dns-updater-values.yml
+    dns-updater
+    /tmp/dns-updater

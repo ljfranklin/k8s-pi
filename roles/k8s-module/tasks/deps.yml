@@ -1,0 +1,33 @@
+---
+- name: install build deps
+  become: yes
+  become_user: root
+  apt:
+    name: build-essential,python-dev,libffi-dev,libssl-dev
+
+- name: update pip
+  become: yes
+  become_user: root
+  pip:
+    name: pip
+    extra_args: "-U"
+
+- name: create compiled dir
+  file:
+    path: /tmp/openshift-wheelhouse
+    state: directory
+
+- name: download compiled k8s deps
+  unarchive:
+    # created with `pip wheel --wheel-dir=/tmp/wheelhouse openshift`
+    src: https://storage.googleapis.com/ansible-assets/openshift-wheel-0.7.2.tgz
+    dest: /tmp/openshift-wheelhouse
+    remote_src: yes
+
+- name: install k8s deps
+  become: yes
+  become_user: root
+  pip:
+    name: openshift
+    extra_args: "--no-index --find-links=/tmp/openshift-wheelhouse"
+

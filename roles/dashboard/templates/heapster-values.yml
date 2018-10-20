@@ -1,0 +1,14 @@
+---
+image:
+  repository: k8s.gcr.io/heapster-arm
+rbac:
+  create: false
+  serviceAccountName: heapster-custom-fix
+resizer:
+  enabled: false
+eventer:
+  enabled: false
+command:
+  - /heapster
+  - "--source=kubernetes:https://kubernetes.default?useServiceAccount=true&kubeletHttps=true&insecure=true&kubeletPort=10250"
+  - "--sink=influxdb:http://monitoring-influxdb.kube-system.svc:8086"

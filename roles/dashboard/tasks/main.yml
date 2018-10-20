@@ -1,0 +1,66 @@
+---
+- name: template influxdb config
+  template:
+    src: ./influxdb-deployment.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: create influxdb deployment
+  k8s:
+    src: /tmp/influxdb-deployment.yml
+
+- name: template heapster config
+  template:
+    src: ./heapster-values.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: template heapster user
+  template:
+    src: ./heapster-user.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: create heapster user
+  k8s:
+    src: /tmp/heapster-user.yml
+
+- name: install heapster
+  shell: >
+    helm upgrade
+    --install
+    --namespace kube-system
+    --values /tmp/heapster-values.yml
+    heapster
+    stable/heapster
+
+- name: template dashboard config
+  template:
+    src: ./dashboard-values.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+  # https://github.com/helm/charts/pull/8621
+- name: install dashboard
+  shell: >
+    helm upgrade
+    --install
+    --namespace kube-system
+    --values /tmp/dashboard-values.yml
+    dashboard
+    https://storage.googleapis.com/ansible-assets/kubernetes-dashboard-timeout-fix.tgz
+
+- name: template admin config
+  template:
+    src: ./admin-user.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: create admin service account
+  k8s:
+    src: /tmp/admin-user.yml

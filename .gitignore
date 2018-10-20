@@ -1,2 +1,4 @@
-secrets.yml
+/secrets/
 /pi/tmp/
+/tmp/
+*.retry

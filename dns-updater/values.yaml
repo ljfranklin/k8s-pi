@@ -1,0 +1,23 @@
+# Default values for dns-updater.
+
+image:
+  # Repository for container image
+  repository: ljfranklin/dynamic-dns-arm
+  # Image tag
+  tag: latest
+  # Image pull policy
+  pullPolicy: IfNotPresent
+
+# when to run the job in cron syntax
+schedule: "*/5 * * * *"
+
+cloudflare:
+  # email associated with Cloudflare account
+  email:
+  # API token from Cloudflare account
+  api_token:
+  # Cloudflare domain zone
+  zone:
+
+# array of domain records to create
+domains:
