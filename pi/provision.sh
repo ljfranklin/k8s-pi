@@ -3,6 +3,7 @@
 set -eu -o pipefail
 
 sd_device_path=""
+static_ip=""
 pi_hostname=""
 ssh_pub_key=""
 os_version="1.9.0"
@@ -17,6 +18,8 @@ Usage:
 Options:
   -d <path>       (required) The device path of the target SD card, e.g. /dev/sda
                              Note: Unmount this device before running this script
+  -i <static_ip>  (optional) Static IP to assign to machine, e.g. 192.168.1.240
+                             Note: Give master node a static IP, others can have dynamic
   -n <hostname>   (required) The hostname for the Pi, e.g. k8s-master
                              The device should be reachable via k8s-master.local
   -p <pub_key>    (required) The SSH public key contents to add to Pi's authorized keys
@@ -26,10 +29,13 @@ EOF
   exit 1
 }
 
-while getopts "d:n:p:o:h" opt; do
+while getopts "d:i:n:p:o:h" opt; do
   case "${opt}" in
     d)
       sd_device_path="$OPTARG"
+      ;;
+    i)
+      static_ip="$OPTARG"
       ;;
     n)
       pi_hostname="$OPTARG"
@@ -90,8 +96,15 @@ pushd "${script_dir}" > /dev/null
   config_contents="$(cat ./hypriot/user-data.yml)"
   config_contents="$(sed -e "s#REPLACE_WITH_HOSTNAME#${pi_hostname}#g" <<< "${config_contents}")"
   config_contents="$(sed -e "s#REPLACE_WITH_PUB_KEY#${trimmed_pub_key}#g" <<< "${config_contents}")"
-
+  if [ -n "${static_ip}" ]; then
+    subnet_prefix="$(cut -d '.' -f1-3 <<< "${static_ip}")" # assumes /24 subnet
+    static_ip_config="$(cat ./hypriot/static-ip-partial.yml)"
+    static_ip_config="$(sed -e "s#REPLACE_WITH_STATIC_IP#${static_ip}#g" <<< "${static_ip_config}")"
+    static_ip_config="$(sed -e "s#REPLACE_WITH_SUBNET_PREFIX#${subnet_prefix}#g" <<< "${static_ip_config}")"
+		config_contents="${config_contents}\n${static_ip_config}"
+	fi
   echo -e "${config_contents}" > "${os_mount}/user-data"
+
   umount "${os_mount}"
   umount "${root_mount}"
 

@@ -1,0 +1,12 @@
+# Static IP address
+write_files:
+  - content: |
+      persistent
+      # Generate Stable Private IPv6 Addresses instead of hardware based ones
+      slaac private
+      # static IP configuration:
+      interface eth0
+      static ip_address=REPLACE_WITH_STATIC_IP/24
+      static routers=REPLACE_WITH_SUBNET_PREFIX.1
+      static domain_name_servers=8.8.8.8 8.8.4.4
+    path: /etc/dhcpcd.conf

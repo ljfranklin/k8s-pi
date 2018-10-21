@@ -3,8 +3,8 @@
 [x] Setup dynamic dns cron
 [x] Add ansible task to deploy dashboard
 [x] bootstrap.sh should take a number of nodes and auto-generate `inventory`
-[ ] Set static IP for master node
-[ ] Run ntp update on boot
+[x] Set static IP for master node
+[x] Run ntp update on boot
 [ ] Deploy unifi controller
 [ ] Auto-renew Let's Encrypt cert
     - plug in usb drive
