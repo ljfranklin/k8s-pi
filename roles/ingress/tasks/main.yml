@@ -1,19 +1,33 @@
 ---
-- name: template traefik config file
+- name: template cert secret file
   template:
-    src: ./traefik-values.yml
+    src: ./cert-secret.yml
     dest: /tmp/
     owner: "{{ansible_env.USER}}"
     group: "{{ansible_env.USER}}"
 
-- name: install traefik
+- name: create cert secret
+  k8s:
+    src: /tmp/cert-secret.yml
+
+- name: template nginx config file
+  template:
+    src: ./nginx-values.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+# lock to 0.20.0 nginx-ingress until UDP alternative exists
+# https://github.com/kubernetes/ingress-nginx/pull/3197
+- name: install nginx
   shell: >
     helm upgrade
     --install
     --namespace kube-system
-    --values /tmp/traefik-values.yml
-    traefik
-    stable/traefik
+    --values /tmp/nginx-values.yml
+    --version 0.29.1
+    nginx-ingress
+    stable/nginx-ingress
 
 - name: copy dns-updater chart
   copy:

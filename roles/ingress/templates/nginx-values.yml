@@ -1,0 +1,21 @@
+---
+controller:
+  image:
+    # pinned to commit which includes prometheus client panic fix but
+    # still includes UDP support...
+    # repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller-arm
+    repository: ljfranklin/nginx-ingress-controller-arm
+    tag: 0.20.0-commit.38922aa
+  # force controller to run on master node
+  nodeSelector:
+    node-role.kubernetes.io/master: ""
+  tolerations:
+  - key: node-role.kubernetes.io/master
+    effect: NoSchedule
+  service:
+    type: NodePort
+    externalIPs:
+    - {{ ansible_default_ipv4.address }}
+defaultBackend:
+  image:
+    repository: k8s.gcr.io/defaultbackend-arm
