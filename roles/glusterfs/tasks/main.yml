@@ -1,0 +1,95 @@
+---
+- name: load dm modules at boot
+  become: yes
+  become_user: root
+  copy:
+    src: dm_snapshot.conf
+    dest: /etc/modules-load.d/dm_snapshot.conf
+
+- name: load dm modules
+  become: yes
+  become_user: root
+  modprobe: name={{item}}
+  with_items:
+    - dm_snapshot
+    - dm_mirror
+    - dm_thin_pool
+
+- name: install heketi CLI
+  become: yes
+  become_user: root
+  unarchive:
+    src: https://github.com/heketi/heketi/releases/download/v8.0.0/heketi-client-v8.0.0.linux.arm.tar.gz
+    extra_opts:
+      - "--strip-components=2"
+      - "heketi-client/bin/heketi-cli"
+    dest: /usr/local/bin/
+    mode: 0755
+    remote_src: yes
+
+# TODO: move config stuff to workers
+- name: create config directory
+  file:
+    path: "{{ansible_env.HOME}}/.kube/"
+    state: directory
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+    mode: 0755
+- name: copy kube config
+  synchronize:
+    src: "{{ansible_env.HOME}}/.kube/config"
+    dest: "{{ansible_env.HOME}}/.kube/config"
+  delegate_to: k8s-master.local
+
+- name: pull gluster-kubernetes
+  git:
+    repo: https://github.com/gluster/gluster-kubernetes.git
+    dest: /tmp/gluster-kubernetes
+    force: true
+
+  # manually build from https://github.com/gluster/gluster-containers/blob/master/Fedora/Dockerfile
+  # Replace 'x86_64' with 'arm32v7'
+- replace:
+    path: /tmp/gluster-kubernetes/deploy/kube-templates/glusterfs-daemonset.yaml
+    regexp: 'gluster/gluster-centos'
+    replace: 'ljfranklin/gluster-fedora-arm'
+
+  # manually build with https://github.com/heketi/heketi/blob/master/extras/docker/rpi/build-rpi-dockerfile.sh
+- replace:
+    path: /tmp/gluster-kubernetes/deploy/kube-templates/heketi-deployment.yaml
+    regexp: 'heketi/heketi:dev'
+    replace: 'ljfranklin/heketi-rpi:latest'
+- replace:
+    path: /tmp/gluster-kubernetes/deploy/kube-templates/deploy-heketi-deployment.yaml
+    regexp: 'heketi/heketi:dev'
+    replace: 'ljfranklin/heketi-rpi:latest'
+- replace:
+    path: /tmp/gluster-kubernetes/deploy/gk-deploy
+    regexp: 'setup-openshift-heketi-storage'
+    replace: 'setup-openshift-heketi-storage --image ljfranklin/heketi-rpi:latest'
+
+- name: template topology file
+  template:
+    src: ./topology.json
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: run gk-deploy
+  become: yes
+  become_user: root
+  command: >
+    ./gk-deploy
+    --deploy-gluster
+    --cli kubectl
+    --namespace kube-system
+    --admin-key '{{glusterfs.admin_key}}'
+    --user-key '{{glusterfs.user_key}}'
+    --single-node
+    --no-object
+    -y
+    /tmp/topology.json
+  args:
+    chdir: /tmp/gluster-kubernetes/deploy/
+  environment:
+    KUBECONFIG: "{{ansible_env.HOME}}/.kube/config"

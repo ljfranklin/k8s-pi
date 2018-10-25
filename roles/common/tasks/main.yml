@@ -21,3 +21,14 @@
   become_user: root
   apt:
     name: kubeadm
+# required by synchronize module
+- name: install rsync
+  become: yes
+  become_user: root
+  apt:
+    name: rsync
+- name: install glusterfs-client
+  become: yes
+  become_user: root
+  apt:
+    name: glusterfs-client

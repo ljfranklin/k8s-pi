@@ -6,14 +6,22 @@
 [x] Set static IP for master node
 [x] Run ntp update on boot
 [x] Switch to nginx for UDP ingress
+[x] Deploy GlusterFS for persistent data
+    - Ansible playbook: https://github.com/gluster/gluster-kubernetes/pull/155/files
+    - Installing glusterfs on arm: http://larmog.github.io/2016/02/22/glusterfs-on-kubernetes-arm/
+    - Installing heketi on K8S: https://github.com/heketi/heketi/blob/master/docs/admin/install-kubernetes.md
+    - Another install guide: https://github.com/psyhomb/heketi
+[ ] Use hostname in topology.json
+[ ] Submit PR for ARM flags to gk-deploy
+[ ] Run openvpn to allow outside connection
+    - Router forward VPN traffic
+    - https://github.com/helm/charts/tree/master/stable/openvpn
+    - Use TCP service: https://github.com/helm/charts/tree/master/stable/nginx-ingress
 [ ] Deploy unifi controller
+    - https://github.com/helm/charts/tree/master/stable/unifi
+    - Possible ARM issues: https://github.com/jacobalberty/unifi-docker/issues/54
+[ ] Install pi-hole
 [ ] Auto-renew Let's Encrypt cert
-    - plug in usb drive
-    - create persistent volume
-    - mount persistent volume in traefik controller
-    - config acme client with path to persistent volume
+    - cert-manager needs arm image: https://github.com/jetstack/cert-manager/pull/780
 [ ] Add ansible task to upgrade cluster
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
-[ ] Install pi-hole
-[ ] Allow SSH to master node from internet?
-    - or run VPN?
