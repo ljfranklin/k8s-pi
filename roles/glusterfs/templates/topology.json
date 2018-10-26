@@ -6,10 +6,10 @@
           "node": {
             "hostnames": {
               "manage": [
-                "k8s-worker5"
+                "{{ ansible_hostname }}"
               ],
               "storage": [
-                "192.168.1.135"
+                "{{ ansible_default_ipv4.address }}"
               ]
             },
             "zone": 1

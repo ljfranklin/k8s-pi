@@ -93,3 +93,22 @@
     chdir: /tmp/gluster-kubernetes/deploy/
   environment:
     KUBECONFIG: "{{ansible_env.HOME}}/.kube/config"
+
+- name: get heketi endpoint var
+  shell: kubectl -n kube-system get service heketi --template {%raw%} 'http://{{.spec.clusterIP}}:{{(index .spec.ports 0).port}}' {%endraw%}
+  register: heketi_endpoint
+
+- name: store endpoint into HEKETI_CLI_SERVER
+  set_fact:
+    HEKETI_CLI_SERVER: "{{heketi_endpoint.stdout}}"
+
+- name: template storage class file
+  template:
+    src: ./storage-class.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: create StorageClass
+  k8s:
+    src: /tmp/storage-class.yml

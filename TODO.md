@@ -11,7 +11,7 @@
     - Installing glusterfs on arm: http://larmog.github.io/2016/02/22/glusterfs-on-kubernetes-arm/
     - Installing heketi on K8S: https://github.com/heketi/heketi/blob/master/docs/admin/install-kubernetes.md
     - Another install guide: https://github.com/psyhomb/heketi
-[ ] Use hostname in topology.json
+[x] Create StorageClass and test service
 [ ] Submit PR for ARM flags to gk-deploy
 [ ] Run openvpn to allow outside connection
     - Router forward VPN traffic
@@ -25,3 +25,5 @@
     - cert-manager needs arm image: https://github.com/jetstack/cert-manager/pull/780
 [ ] Add ansible task to upgrade cluster
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
+[ ] Use hostname in topology.json
+    - Blocked: https://github.com/coredns/coredns/pull/2233

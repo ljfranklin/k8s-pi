@@ -20,3 +20,9 @@
     - helm
     - ingress
     - dashboard
+
+- hosts: k8s-worker5.local
+  any_errors_fatal: true
+  roles:
+    - k8s-module
+    - glusterfs
