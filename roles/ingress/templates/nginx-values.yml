@@ -3,9 +3,10 @@ controller:
   image:
     # pinned to commit which includes prometheus client panic fix but
     # still includes UDP support...
-    # repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller-arm
+    # check out github.com/ljfranklin/nginx-ingress
+    # make build ARCH=arm && make container ARCH=arm
     repository: ljfranklin/nginx-ingress-controller-arm
-    tag: 0.20.0-commit.38922aa
+    tag: 0.20.0-tcpudp
   # force controller to run on master node
   nodeSelector:
     node-role.kubernetes.io/master: ""
@@ -19,3 +20,5 @@ controller:
 defaultBackend:
   image:
     repository: k8s.gcr.io/defaultbackend-arm
+tcp:
+  1194: default/openvpn:1194

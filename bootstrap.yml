@@ -26,3 +26,8 @@
   roles:
     - k8s-module
     - glusterfs
+
+- hosts: master
+  any_errors_fatal: true
+  roles:
+    - openvpn

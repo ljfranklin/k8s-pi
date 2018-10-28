@@ -12,11 +12,14 @@
     - Installing heketi on K8S: https://github.com/heketi/heketi/blob/master/docs/admin/install-kubernetes.md
     - Another install guide: https://github.com/psyhomb/heketi
 [x] Create StorageClass and test service
-[ ] Submit PR for ARM flags to gk-deploy
-[ ] Run openvpn to allow outside connection
+[x] Run openvpn to allow outside connection
     - Router forward VPN traffic
     - https://github.com/helm/charts/tree/master/stable/openvpn
     - Use TCP service: https://github.com/helm/charts/tree/master/stable/nginx-ingress
+[ ] Switch to heketi hostname in storage class
+    - Blocked: https://github.com/kubernetes-incubator/kubespray/issues/3177
+[ ] Use hostname in heketi topology.json
+    - Blocked: https://github.com/coredns/coredns/pull/2233
 [ ] Deploy unifi controller
     - https://github.com/helm/charts/tree/master/stable/unifi
     - Possible ARM issues: https://github.com/jacobalberty/unifi-docker/issues/54
@@ -25,5 +28,3 @@
     - cert-manager needs arm image: https://github.com/jetstack/cert-manager/pull/780
 [ ] Add ansible task to upgrade cluster
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
-[ ] Use hostname in topology.json
-    - Blocked: https://github.com/coredns/coredns/pull/2233

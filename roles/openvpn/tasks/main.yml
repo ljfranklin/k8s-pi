@@ -1,0 +1,15 @@
+---
+- name: template openvpn config
+  template:
+    src: ./openvpn-values.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: install openvpn
+  shell: >
+    helm upgrade
+    --install
+    --values /tmp/openvpn-values.yml
+    openvpn
+    stable/openvpn

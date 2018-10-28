@@ -1,0 +1,17 @@
+---
+# manually built from https://github.com/ljfranklin/openvpn-docker
+image:
+  repository: ljfranklin/openvpn-docker-arm
+  tag: latest
+service:
+  type: ClusterIP
+  externalPort: 1194
+  internalPort: 1194
+persistence:
+  storageClass: gluster-heketi
+openvpn:
+  OVPN_K8S_POD_NETWORK: 10.244.0.0
+  OVPN_K8S_POD_SUBNET: 255.255.0.0
+  OVPN_K8S_SVC_NETWORK: 192.168.1.0
+  OVPN_K8S_SVC_SUBNET: 255.255.255.0
+  redirectGateway: true

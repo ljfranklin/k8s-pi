@@ -6,5 +6,6 @@ metadata:
 provisioner: kubernetes.io/glusterfs
 parameters:
   resturl: "{{HEKETI_CLI_SERVER}}"
-  restuser: "user"
-  restuserkey: "{{glusterfs.user_key}}"
+  restuser: "admin"
+  restuserkey: "{{glusterfs.admin_key}}"
+  volumetype: "none"
