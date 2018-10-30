@@ -12,8 +12,10 @@ domain="$2"
 echo "Updating DNS for '${domain}'..."
 
 cat << EOF > /tmp/ddclient.conf
-ssl=yes
-use=web
+ssl=yes,
+use=cmd
+cmd="curl -L https://dns.loopia.se/checkip/checkip.php"
+cmd-skip="Current IP Address:"
 protocol=cloudflare, \
 zone=${zone}, \
 ttl=120, \

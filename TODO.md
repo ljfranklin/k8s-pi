@@ -16,6 +16,7 @@
     - Router forward VPN traffic
     - https://github.com/helm/charts/tree/master/stable/openvpn
     - Use TCP service: https://github.com/helm/charts/tree/master/stable/nginx-ingress
+[x] Use HTTPS get grab public IP
 [ ] Switch to heketi hostname in storage class
     - Blocked: https://github.com/kubernetes-incubator/kubespray/issues/3177
 [ ] Use hostname in heketi topology.json
