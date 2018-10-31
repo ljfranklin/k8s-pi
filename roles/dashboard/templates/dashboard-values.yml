@@ -15,6 +15,5 @@ ingress:
   tls:
     - hosts:
       - k8s.{{ ingress.domain }}
-      secretName: ingress-cert-secret
 livenessProbe:
   initialDelaySeconds: 120

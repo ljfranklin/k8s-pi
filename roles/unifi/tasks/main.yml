@@ -1,0 +1,15 @@
+---
+- name: template unifi config
+  template:
+    src: ./unifi-values.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: install unifi
+  shell: >
+    helm upgrade
+    --install
+    --values /tmp/unifi-values.yml
+    unifi
+    stable/unifi

@@ -1,0 +1,24 @@
+---
+image:
+  repository: jacobalberty/unifi
+  tag: arm32v7-beta
+controllerService:
+  type: ClusterIP
+stunService:
+  type: ClusterIP
+discoveryService:
+  type: ClusterIP
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+  hosts:
+    - unifi.{{ ingress.domain }}
+  tls:
+    - hosts:
+      - unifi.{{ ingress.domain }}
+persistence:
+  enabled: true
+  storageClass: gluster-heketi
+  accessModes: ReadWriteOnce

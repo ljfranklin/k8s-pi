@@ -17,8 +17,14 @@ controller:
     type: NodePort
     externalIPs:
     - {{ ansible_default_ipv4.address }}
+  extraArgs:
+    default-ssl-certificate: kube-system/ingress-cert-secret
 defaultBackend:
   image:
     repository: k8s.gcr.io/defaultbackend-arm
 tcp:
   1194: default/openvpn:1194
+  8080: default/unifi-controller:8080
+udp:
+  3478: default/unifi-stun:3478
+  10001: default/unifi-discovery:10001
