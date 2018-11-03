@@ -1,0 +1,12 @@
+---
+# manually build on raspberry pi
+# https://github.com/ljfranklin/cert-manager/tree/multi-arch
+# make build GOARCH=arm
+image:
+  repository: ljfranklin/cert-manager-controller-arm
+  tag: latest
+ingressShim:
+  defaultIssuerName: letsencrypt-prod
+  defaultIssuerKind: ClusterIssuer
+  defaultACMEChallengeType: dns01
+  defaultACMEDNS01ChallengeProvider: cf-dns

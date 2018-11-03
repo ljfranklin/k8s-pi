@@ -1,0 +1,19 @@
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: default-backend-cert
+  namespace: kube-system
+spec:
+  secretName: default-backend-cert-secret
+  dnsNames:
+  - "*.{{ ingress.domain }}"
+  acme:
+    config:
+    - dns01:
+        provider: cf-dns
+      domains:
+      - "*.{{ ingress.domain }}"
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer

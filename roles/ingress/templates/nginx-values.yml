@@ -18,7 +18,7 @@ controller:
     externalIPs:
     - {{ ansible_default_ipv4.address }}
   extraArgs:
-    default-ssl-certificate: kube-system/ingress-cert-secret
+    default-ssl-certificate: kube-system/default-backend-cert-secret
 defaultBackend:
   image:
     repository: k8s.gcr.io/defaultbackend-arm

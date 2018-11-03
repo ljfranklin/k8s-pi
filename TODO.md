@@ -20,8 +20,11 @@
 [x] Deploy unifi controller
     - https://github.com/helm/charts/tree/master/stable/unifi
     - Possible ARM issues: https://github.com/jacobalberty/unifi-docker/issues/54
-[ ] Auto-renew Let's Encrypt cert
+[x] Auto-renew Let's Encrypt cert
     - cert-manager needs arm image: https://github.com/jetstack/cert-manager/pull/780
+[ ] Backup persistent data
+    - backup etcd
+    - backup volumes
 [ ] Install pi-hole
 [ ] Switch to heketi hostname in storage class
     - Blocked: https://github.com/kubernetes-incubator/kubespray/issues/3177
