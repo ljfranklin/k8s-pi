@@ -32,4 +32,6 @@
     - Blocked: https://github.com/coredns/coredns/pull/2233
 [ ] Add ansible task to upgrade cluster
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
+[ ] Get off fork of nginx-ingress
+    - Blocked: https://github.com/kubernetes/ingress-nginx/pull/3374
 [ ] Install MetalLB

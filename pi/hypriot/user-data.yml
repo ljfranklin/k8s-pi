@@ -32,7 +32,12 @@ packages:
 
 # These commands will be ran once on first boot only
 runcmd:
-  # Pickup the hostname changes
-  - 'systemctl restart avahi-daemon'
+  # update to later kernel
+  - 'wget -O /tmp/kernel.deb https://storage.cloud.google.com/ansible-assets/raspberrypi-kernel_20181109-040429_armhf.deb'
+  - 'wget -O /tmp/kernel-headers.deb https://storage.cloud.google.com/ansible-assets/raspberrypi-kernel-headers_20181109-040429_armhf.deb'
+  - 'dpkg -i /tmp/kernel.deb'
+  - 'dpkg -i /tmp/kernel-headers.deb'
 
-package_upgrade: false
+power_state:
+  mode: reboot
+  condition: true

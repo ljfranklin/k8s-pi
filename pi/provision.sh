@@ -101,8 +101,8 @@ pushd "${script_dir}" > /dev/null
     static_ip_config="$(cat ./hypriot/static-ip-partial.yml)"
     static_ip_config="$(sed -e "s#REPLACE_WITH_STATIC_IP#${static_ip}#g" <<< "${static_ip_config}")"
     static_ip_config="$(sed -e "s#REPLACE_WITH_SUBNET_PREFIX#${subnet_prefix}#g" <<< "${static_ip_config}")"
-		config_contents="${config_contents}\n${static_ip_config}"
-	fi
+    config_contents="${config_contents}\n${static_ip_config}"
+  fi
   echo -e "${config_contents}" > "${os_mount}/user-data"
 
   umount "${os_mount}"
