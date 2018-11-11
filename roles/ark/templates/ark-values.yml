@@ -1,0 +1,14 @@
+---
+image:
+  # built from https://github.com/ljfranklin/ark/tree/arm-0.9
+  repository: ljfranklin/ark-arm
+  tag: 0.9.11
+configuration:
+  backupStorageProvider:
+    name: {{ backup.provider }}
+    bucket: {{ backup.bucket }}
+    resticLocation: {{ backup.volumesBucket }}
+credentials:
+  secretContents:
+    {{ backup.provider}}: |
+      {{ backup.credentials | indent(width=6) }}

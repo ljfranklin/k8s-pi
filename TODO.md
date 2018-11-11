@@ -22,9 +22,16 @@
     - Possible ARM issues: https://github.com/jacobalberty/unifi-docker/issues/54
 [x] Auto-renew Let's Encrypt cert
     - cert-manager needs arm image: https://github.com/jetstack/cert-manager/pull/780
-[ ] Backup persistent data
-    - backup etcd
-    - backup volumes
+[x] Backup persistent data
+    - install ark + restic
+    - pull in chart w/restic PR
+    - manually build ARM ark image
+    - create GCP bucket + service account
+[ ] Set automated schedule for backups
+[ ] Take a backup
+[ ] Install weave-net
+[ ] Restore from backup
+[ ] Install MetalLB
 [ ] Install pi-hole
 [ ] Switch to heketi hostname in storage class
     - Blocked: https://github.com/kubernetes-incubator/kubespray/issues/3177
@@ -34,4 +41,3 @@
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
 [ ] Get off fork of nginx-ingress
     - Blocked: https://github.com/kubernetes/ingress-nginx/pull/3374
-[ ] Install MetalLB

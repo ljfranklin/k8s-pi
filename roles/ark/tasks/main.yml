@@ -1,0 +1,16 @@
+---
+- name: template ark config
+  template:
+    src: ./ark-values.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: install ark
+  shell: >
+    helm upgrade
+    --install
+    --namespace heptio-ark
+    --values /tmp/ark-values.yml
+    ark
+    https://storage.googleapis.com/ansible-assets/ark-chart-restic-pr-1.4.8.tgz

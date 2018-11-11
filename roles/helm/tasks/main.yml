@@ -25,4 +25,5 @@
 - name: init helm
   # no official tiller image for arm yet
   # https://github.com/helm/helm/issues/3269
-  shell: helm init --tiller-image=jessestuart/tiller:v2.9.1 --service-account tiller
+  # manually built from https://github.com/ljfranklin/helm-arm
+  shell: helm init --tiller-image=ljfranklin/helm-arm:2.11.0 --service-account tiller

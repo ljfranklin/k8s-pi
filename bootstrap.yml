@@ -30,5 +30,6 @@
 - hosts: master
   any_errors_fatal: true
   roles:
+    - ark
     - openvpn
     - unifi
