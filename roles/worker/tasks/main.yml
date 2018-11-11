@@ -7,3 +7,17 @@
   become: yes
   become_user: root
   shell: "{{ hostvars[groups['master'][0]]['join_cmd']['stdout'] }}"
+
+- name: create config directory
+  file:
+    path: "{{ansible_env.HOME}}/.kube/"
+    state: directory
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+    mode: 0755
+
+- name: copy kube config
+  synchronize:
+    src: "{{ansible_env.HOME}}/.kube/config"
+    dest: "{{ansible_env.HOME}}/.kube/config"
+  delegate_to: k8s-master.local

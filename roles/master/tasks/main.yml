@@ -6,7 +6,7 @@
 - name: init k8s
   become: yes
   become_user: root
-  shell: kubeadm init --pod-network-cidr 10.244.0.0/16
+  shell: kubeadm init
 - name: create config directory
   file:
     path: "{{ansible_env.HOME}}/.kube/"
@@ -24,8 +24,7 @@
     group: "{{ansible_env.USER}}"
     mode: 0755
     remote_src: yes
-  # pinned due to https://github.com/coreos/flannel/issues/1044
-- name: install flannel CNI plugin
-  shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+- name: install weave-net CNI plugin
+  shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 - register: join_cmd
   shell: kubeadm token create --print-join-command

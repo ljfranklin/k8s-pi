@@ -13,14 +13,6 @@
   roles:
     - worker
 
-- hosts: master
-  any_errors_fatal: true
-  roles:
-    - k8s-module
-    - helm
-    - ingress
-    - dashboard
-
 - hosts: k8s-worker5.local
   any_errors_fatal: true
   roles:
@@ -30,6 +22,14 @@
 - hosts: master
   any_errors_fatal: true
   roles:
+    - k8s-module
+    - helm
     - ark
+
+- hosts: master
+  any_errors_fatal: true
+  roles:
+    - ingress
+    - dashboard
     - openvpn
     - unifi

@@ -28,9 +28,9 @@
     - manually build ARM ark image
     - create GCP bucket + service account
 [x] Set automated schedule for backups
-[ ] Take a backup
-[ ] Install weave-net
-[ ] Restore from backup
+[x] Take a backup
+[x] Install weave-net
+[x] Restore from backup
 [ ] Automatically annotate openvpn + unifi for backups
     - kubectl annotate pod openvpn-54bdcd4d7b-sj6nn backup.ark.heptio.com/backup-volumes=certs
 [ ] Install MetalLB

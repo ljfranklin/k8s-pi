@@ -27,20 +27,6 @@
     mode: 0755
     remote_src: yes
 
-# TODO: move config stuff to workers
-- name: create config directory
-  file:
-    path: "{{ansible_env.HOME}}/.kube/"
-    state: directory
-    owner: "{{ansible_env.USER}}"
-    group: "{{ansible_env.USER}}"
-    mode: 0755
-- name: copy kube config
-  synchronize:
-    src: "{{ansible_env.HOME}}/.kube/config"
-    dest: "{{ansible_env.HOME}}/.kube/config"
-  delegate_to: k8s-master.local
-
 - name: pull gluster-kubernetes
   git:
     repo: https://github.com/gluster/gluster-kubernetes.git
