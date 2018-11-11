@@ -6,6 +6,15 @@
     owner: "{{ansible_env.USER}}"
     group: "{{ansible_env.USER}}"
 
+- name: install ark cli
+  become: yes
+  become_user: root
+  unarchive:
+    src: https://github.com/heptio/ark/releases/download/v0.9.11/ark-v0.9.11-linux-arm.tar.gz
+    dest: /usr/local/bin/
+    mode: 0755
+    remote_src: yes
+
 - name: install ark
   shell: >
     helm upgrade
@@ -14,3 +23,7 @@
     --values /tmp/ark-values.yml
     ark
     https://storage.googleapis.com/ansible-assets/ark-chart-restic-pr-1.4.8.tgz
+
+- name: create schedule
+  shell: >
+    ark schedule get daily-backups || ark schedule create daily-backups --schedule "0 7 * * *" --ttl "336h0m0s"

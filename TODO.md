@@ -27,10 +27,12 @@
     - pull in chart w/restic PR
     - manually build ARM ark image
     - create GCP bucket + service account
-[ ] Set automated schedule for backups
+[x] Set automated schedule for backups
 [ ] Take a backup
 [ ] Install weave-net
 [ ] Restore from backup
+[ ] Automatically annotate openvpn + unifi for backups
+    - kubectl annotate pod openvpn-54bdcd4d7b-sj6nn backup.ark.heptio.com/backup-volumes=certs
 [ ] Install MetalLB
 [ ] Install pi-hole
 [ ] Switch to heketi hostname in storage class
