@@ -4,9 +4,10 @@ image:
   repository: ljfranklin/openvpn-docker-arm
   tag: latest
 service:
-  type: ClusterIP
+  type: LoadBalancer
   externalPort: 1194
   internalPort: 1194
+  loadBalancerIP: 192.168.1.50
 persistence:
   storageClass: gluster-heketi
 openvpn:

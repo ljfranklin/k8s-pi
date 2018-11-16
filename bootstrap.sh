@@ -7,18 +7,21 @@ tmpdir="$(mktemp -d /tmp/k8s-pi.XXXXXXXX)"
 trap '{ rm -rf "${tmpdir}"; }' EXIT
 
 : "${WORKER_COUNT:=5}"
+: "${IP_RANGE_START:=192.168.1.100}"
 : "${PRIVATE_KEY_PATH:="$HOME/.ssh/id_rsa_k8s"}"
 : "${SECRETS_PATH:="${my_dir}/secrets/secrets.yml"}"
 
 cat << EOF > "${tmpdir}/inventory"
 [master]
-k8s-master.local
+${IP_RANGE_START}
 
 [workers]
 EOF
 
 for i in $(seq 1 "${WORKER_COUNT}"); do
-  echo "k8s-worker${i}.local" >> "${tmpdir}/inventory"
+  subnet="$(cut -d '.' -f1-3 <<< "${IP_RANGE_START}")"
+  start_ip="$(cut -d '.' -f4 <<< "${IP_RANGE_START}")"
+  echo "${subnet}.$((start_ip+i))" >> "${tmpdir}/inventory"
 done
 
 ansible-playbook \
@@ -33,7 +36,7 @@ echo "https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl"
 
 echo ""
 echo "Download the config to run kubectl:"
-echo "scp k8s@k8s-master.local:/home/k8s/.kube/config ~/.kube/"
+echo "scp k8s@${IP_RANGE_START}:/home/k8s/.kube/config ~/.kube/"
 
 echo ""
 echo "Install helm CLI:"

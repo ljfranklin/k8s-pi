@@ -7,24 +7,13 @@ controller:
     # make build ARCH=arm && make container ARCH=arm
     repository: ljfranklin/nginx-ingress-controller-arm
     tag: 0.20.0-tcpudp
-  # force controller to run on master node
-  nodeSelector:
-    node-role.kubernetes.io/master: ""
-  tolerations:
-  - key: node-role.kubernetes.io/master
-    effect: NoSchedule
   service:
-    type: NodePort
-    externalIPs:
-    - {{ ansible_default_ipv4.address }}
+    type: LoadBalancer
+    loadBalancerIP: 192.168.1.51
+    annotations:
+      metallb.universe.tf/allow-shared-ip: ingress-shared
   extraArgs:
     default-ssl-certificate: kube-system/default-backend-cert-secret
 defaultBackend:
   image:
     repository: k8s.gcr.io/defaultbackend-arm
-tcp:
-  1194: default/openvpn:1194
-  8080: default/unifi-controller:8080
-udp:
-  3478: default/unifi-stun:3478
-  10001: default/unifi-discovery:10001

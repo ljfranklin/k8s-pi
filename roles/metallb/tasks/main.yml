@@ -1,0 +1,16 @@
+---
+- name: template metallb config
+  template:
+    src: ./metallb-values.yml
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- name: install metallb
+  shell: >
+    helm upgrade
+    --install
+    --namespace kube-system
+    --values /tmp/metallb-values.yml
+    metallb
+    stable/metallb

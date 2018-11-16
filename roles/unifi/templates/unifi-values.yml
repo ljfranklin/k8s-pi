@@ -2,12 +2,6 @@
 image:
   repository: jacobalberty/unifi
   tag: arm32v7-beta
-controllerService:
-  type: ClusterIP
-stunService:
-  type: ClusterIP
-discoveryService:
-  type: ClusterIP
 ingress:
   enabled: true
   annotations:
@@ -20,6 +14,24 @@ ingress:
     - hosts:
       - unifi.{{ ingress.domain }}
       secretName: unifi-cert
+controllerService:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.51
+  port: 8080
+  annotations:
+    metallb.universe.tf/allow-shared-ip: ingress-shared
+stunService:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.51
+  port: 3478
+  annotations:
+    metallb.universe.tf/allow-shared-ip: ingress-shared
+discoveryService:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.51
+  port: 10001
+  annotations:
+    metallb.universe.tf/allow-shared-ip: ingress-shared
 persistence:
   enabled: true
   storageClass: gluster-heketi

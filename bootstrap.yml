@@ -13,7 +13,7 @@
   roles:
     - worker
 
-- hosts: k8s-worker5.local
+- hosts: 192.168.1.105
   any_errors_fatal: true
   roles:
     - k8s-module
@@ -29,6 +29,7 @@
 - hosts: master
   any_errors_fatal: true
   roles:
+    - metallb
     - ingress
     - dashboard
     - openvpn

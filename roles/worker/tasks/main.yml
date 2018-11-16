@@ -20,4 +20,4 @@
   synchronize:
     src: "{{ansible_env.HOME}}/.kube/config"
     dest: "{{ansible_env.HOME}}/.kube/config"
-  delegate_to: k8s-master.local
+  delegate_to: 192.168.1.100
