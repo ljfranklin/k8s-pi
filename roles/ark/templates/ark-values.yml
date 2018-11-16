@@ -4,6 +4,8 @@ image:
   repository: ljfranklin/ark-arm
   tag: 0.9.11
 configuration:
+  # uncomment this line if restoring from backup
+  # restoreOnlyMode: true
   backupStorageProvider:
     name: {{ backup.provider }}
     bucket: {{ backup.bucket }}
