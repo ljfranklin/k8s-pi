@@ -40,11 +40,13 @@
     - Enable BGP on router
     - Blog: https://medium.com/@ipuustin/using-metallb-as-kubernetes-load-balancer-with-ubiquiti-edgerouter-7ff680e9dca3
     - Docs: https://help.ubnt.com/hc/en-us/articles/205222990-EdgeRouter-Border-Gateway-Protocol
+[ ] Automatically annotate openvpn + unifi for backups
+    - kubectl annotate pod openvpn-54bdcd4d7b-sj6nn backup.ark.heptio.com/backup-volumes=certs
+    - kubectl annotate pod unifi-55f6dcc44c-khbrk backup.ark.heptio.com/backup-volumes=unifi-data
+[ ] Auto apply BGP rules to Gateway
 [ ] Get hostnames for LAN2
     - Router only gives DNS record for DHCP clients, not static clients
     - `.local` doesn't resolve across two LAN networks
-[ ] Automatically annotate openvpn + unifi for backups
-    - kubectl annotate pod openvpn-54bdcd4d7b-sj6nn backup.ark.heptio.com/backup-volumes=certs
 [ ] Install pi-hole
 [ ] Add ansible task to upgrade cluster
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
