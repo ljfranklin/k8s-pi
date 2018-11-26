@@ -43,16 +43,41 @@
 [ ] Automatically annotate openvpn + unifi for backups
     - kubectl annotate pod openvpn-54bdcd4d7b-sj6nn backup.ark.heptio.com/backup-volumes=certs
     - kubectl annotate pod unifi-55f6dcc44c-khbrk backup.ark.heptio.com/backup-volumes=unifi-data
-[ ] Auto apply BGP rules to Gateway
-[ ] Get hostnames for LAN2
-    - Router only gives DNS record for DHCP clients, not static clients
-    - `.local` doesn't resolve across two LAN networks
-[ ] Install pi-hole
-[ ] Add ansible task to upgrade cluster
-    - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
-[ ] Switch to heketi hostname in storage class
-    - Blocked: https://github.com/kubernetes-incubator/kubespray/issues/3177
-[ ] Use hostname in heketi topology.json
-    - Blocked: https://github.com/coredns/coredns/pull/2233
+[x] Add following contents to `data/sites/default/config.gateway.json` in Unifi controller volume
+```
+{
+    "protocols": {
+        "bgp": {
+            "64512": {
+                "neighbor": {
+                    "192.168.1.101": {
+                        "remote-as": "64512"
+                    },
+                        "192.168.1.102": {
+                            "remote-as": "64512"
+                        },
+                        "192.168.1.103": {
+                            "remote-as": "64512"
+                        },
+                        "192.168.1.104": {
+                            "remote-as": "64512"
+                        },
+                        "192.168.1.105": {
+                            "remote-as": "64512"
+                        }
+                },
+                    "parameters": {
+                        "router-id": "192.168.1.1"
+                    }
+            }
+        }
+    }
+}
+```
+[ ] Parameterize static IPs
 [ ] Get off fork of nginx-ingress
     - Blocked: https://github.com/kubernetes/ingress-nginx/pull/3374
+[ ] Add ansible task to upgrade cluster
+    - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
+[ ] Get off forked docker images
+[ ] Install pi-hole

@@ -13,3 +13,22 @@
     --values /tmp/unifi-values.yml
     unifi
     stable/unifi
+
+- name: template unifi gateway config
+  template:
+    src: ./config.gateway.json
+    dest: /tmp/
+    owner: "{{ansible_env.USER}}"
+    group: "{{ansible_env.USER}}"
+
+- register: unifi_pod
+  shell: >
+    kubectl get pods
+    --selector=app=unifi
+    -o jsonpath="{.items[0].metadata.name}"
+
+- name: copy unifi gateway config
+  shell: >
+    kubectl cp
+    /tmp/config.gateway.json
+    {{unifi_pod.stdout}}:/unifi/data/sites/default/

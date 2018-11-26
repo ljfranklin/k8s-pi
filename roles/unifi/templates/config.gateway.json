@@ -1,0 +1,20 @@
+{
+    "protocols": {
+        "bgp": {
+            "64512": {
+                "parameters": {
+{% set ip = groups['workers'][0].split('.') %}
+                    "router-id": "{{ ip[0] }}.{{ ip[1] }}.{{ ip[2] }}.1"
+                },
+                "neighbor": {
+{% for host in groups['workers'] %}
+                    "{{ host }}": {
+                        "remote-as": "64512"
+                    }{% if not loop.last %},{% endif %}
+
+{% endfor %}
+                }
+            }
+        }
+    }
+}

@@ -26,8 +26,8 @@
   # no official tiller image for arm yet
   # https://github.com/helm/helm/issues/3269
   # manually built from https://github.com/ljfranklin/helm-arm
-  shell: helm init --tiller-image=ljfranklin/helm-arm:2.11.0 --service-account tiller
-
-# give time for tiller pod to be ready
-- pause:
-    minutes: 1
+  shell: >
+    helm init
+    --tiller-image=ljfranklin/helm-arm:2.11.0
+    --service-account tiller
+    --wait
