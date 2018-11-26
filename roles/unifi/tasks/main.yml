@@ -32,3 +32,11 @@
     kubectl cp
     /tmp/config.gateway.json
     {{unifi_pod.stdout}}:/unifi/data/sites/default/
+
+- name: annotate pod for backups
+  shell: >
+    kubectl annotate
+    --overwrite
+    pod
+    {{unifi_pod.stdout}}
+    backup.ark.heptio.com/backup-volumes=unifi-data

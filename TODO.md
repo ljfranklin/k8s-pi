@@ -40,7 +40,7 @@
     - Enable BGP on router
     - Blog: https://medium.com/@ipuustin/using-metallb-as-kubernetes-load-balancer-with-ubiquiti-edgerouter-7ff680e9dca3
     - Docs: https://help.ubnt.com/hc/en-us/articles/205222990-EdgeRouter-Border-Gateway-Protocol
-[ ] Automatically annotate openvpn + unifi for backups
+[x] Automatically annotate openvpn + unifi for backups
     - kubectl annotate pod openvpn-54bdcd4d7b-sj6nn backup.ark.heptio.com/backup-volumes=certs
     - kubectl annotate pod unifi-55f6dcc44c-khbrk backup.ark.heptio.com/backup-volumes=unifi-data
 [x] Add following contents to `data/sites/default/config.gateway.json` in Unifi controller volume
@@ -76,7 +76,6 @@
 ```
 [ ] Parameterize static IPs
 [ ] Get off fork of nginx-ingress
-    - Blocked: https://github.com/kubernetes/ingress-nginx/pull/3374
 [ ] Add ansible task to upgrade cluster
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
 [ ] Get off forked docker images

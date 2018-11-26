@@ -1,15 +1,29 @@
 ---
-- name: template openvpn config
-  template:
-    src: ./openvpn-values.yml
-    dest: /tmp/
-    owner: "{{ansible_env.USER}}"
-    group: "{{ansible_env.USER}}"
+# - name: template openvpn config
+#   template:
+#     src: ./openvpn-values.yml
+#     dest: /tmp/
+#     owner: "{{ansible_env.USER}}"
+#     group: "{{ansible_env.USER}}"
 
-- name: install openvpn
+# - name: install openvpn
+#   shell: >
+#     helm upgrade
+#     --install
+#     --values /tmp/openvpn-values.yml
+#     openvpn
+#     stable/openvpn
+
+- register: openvpn_pod
   shell: >
-    helm upgrade
-    --install
-    --values /tmp/openvpn-values.yml
-    openvpn
-    stable/openvpn
+    kubectl get pods
+    --selector=app=openvpn
+    -o jsonpath="{.items[0].metadata.name}"
+
+- name: annotate pod for backups
+  shell: >
+    kubectl annotate
+    --overwrite
+    pod
+    {{openvpn_pod.stdout}}
+    backup.ark.heptio.com/backup-volumes=certs
