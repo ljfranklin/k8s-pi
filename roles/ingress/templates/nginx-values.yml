@@ -9,7 +9,7 @@ controller:
     tag: 0.20.0-tcpudp
   service:
     type: LoadBalancer
-    loadBalancerIP: 192.168.1.51
+    loadBalancerIP: {{ ingress.nginxStaticIP }}
     annotations:
       metallb.universe.tf/allow-shared-ip: ingress-shared
   extraArgs:

@@ -16,19 +16,19 @@ ingress:
       secretName: unifi-cert
 controllerService:
   type: LoadBalancer
-  loadBalancerIP: 192.168.1.51
+  loadBalancerIP: {{ ingress.nginxStaticIP }}
   port: 8080
   annotations:
     metallb.universe.tf/allow-shared-ip: ingress-shared
 stunService:
   type: LoadBalancer
-  loadBalancerIP: 192.168.1.51
+  loadBalancerIP: {{ ingress.nginxStaticIP }}
   port: 3478
   annotations:
     metallb.universe.tf/allow-shared-ip: ingress-shared
 discoveryService:
   type: LoadBalancer
-  loadBalancerIP: 192.168.1.51
+  loadBalancerIP: {{ ingress.nginxStaticIP }}
   port: 10001
   annotations:
     metallb.universe.tf/allow-shared-ip: ingress-shared

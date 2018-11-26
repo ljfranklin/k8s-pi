@@ -13,7 +13,7 @@
   roles:
     - worker
 
-- hosts: 192.168.1.105
+- hosts: workers[-1]
   any_errors_fatal: true
   roles:
     - k8s-module

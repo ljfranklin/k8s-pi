@@ -7,12 +7,13 @@ service:
   type: LoadBalancer
   externalPort: 1194
   internalPort: 1194
-  loadBalancerIP: 192.168.1.50
+  loadBalancerIP: {{ ingress.openvpnStaticIP }}
 persistence:
   storageClass: gluster-heketi
 openvpn:
   OVPN_K8S_POD_NETWORK: 10.244.0.0
   OVPN_K8S_POD_SUBNET: 255.255.0.0
-  OVPN_K8S_SVC_NETWORK: 192.168.1.0
+{% set network = (ansible_default_ipv4.address.split('.')[:3]|join('.')) + '.0' %}
+  OVPN_K8S_SVC_NETWORK: {{ network }}
   OVPN_K8S_SVC_SUBNET: 255.255.255.0
   redirectGateway: true
