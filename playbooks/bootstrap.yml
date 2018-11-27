@@ -1,0 +1,16 @@
+---
+- hosts: all
+  any_errors_fatal: true
+  roles:
+    - common
+
+- hosts: master
+  any_errors_fatal: true
+  tasks:
+    - include_tasks: roles/master/tasks/reset.yml
+
+- hosts: workers
+  tasks:
+    - include_tasks: roles/worker/tasks/reset.yml
+
+- import_playbook: upgrade.yml

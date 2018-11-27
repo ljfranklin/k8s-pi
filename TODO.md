@@ -46,7 +46,7 @@
 [x] Add BGP config to `data/sites/default/config.gateway.json` in Unifi controller volume
 [x] Parameterize static IPs
 [x] Allow running ansible worker task to run independently of master task
-[ ] Add ansible task to upgrade cluster
+[x] Add ansible task to upgrade cluster
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
 [ ] Get off forked docker images
 [ ] Write blog post
