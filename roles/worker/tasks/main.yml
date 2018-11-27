@@ -3,10 +3,6 @@
   become: yes
   become_user: root
   shell: kubeadm reset -f
-- name: join cluster
-  become: yes
-  become_user: root
-  shell: "{{ hostvars[groups['master'][0]]['join_cmd']['stdout'] }}"
 
 - name: create config directory
   file:
@@ -17,7 +13,25 @@
     mode: 0755
 
 - name: copy kube config
+  delegate_to: "{{ groups['master'][0] }}"
   synchronize:
     src: "{{ansible_env.HOME}}/.kube/config"
     dest: "{{ansible_env.HOME}}/.kube/config"
+
+- register: token_cmd
+  become: yes
+  become_user: root
   delegate_to: "{{ groups['master'][0] }}"
+  shell: >
+    kubeadm
+    token create
+    --ttl 5m
+
+- name: join cluster
+  become: yes
+  become_user: root
+  shell: >
+    kubeadm
+    join
+    --tls-bootstrap-token "{{ token_cmd.stdout }}"
+    --discovery-file "{{ansible_env.HOME}}/.kube/config"

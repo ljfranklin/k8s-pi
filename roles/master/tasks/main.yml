@@ -26,5 +26,3 @@
     remote_src: yes
 - name: install weave-net CNI plugin
   shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
-- register: join_cmd
-  shell: kubeadm token create --print-join-command
