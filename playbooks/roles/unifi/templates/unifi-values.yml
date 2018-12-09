@@ -36,3 +36,5 @@ persistence:
   enabled: true
   storageClass: gluster-heketi
   accessModes: ReadWriteOnce
+podAnnotations:
+  backup.ark.heptio.com/backup-volumes: unifi-data

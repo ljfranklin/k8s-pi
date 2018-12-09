@@ -3,7 +3,7 @@
         "bgp": {
             "64512": {
                 "parameters": {
-{% set ip = groups['workers'][0].split('.')[:3]|join('.')) + '.1' %}
+{% set ip = groups['workers'][0].split('.')[:3]|join('.') + '.1' %}
                     "router-id": "{{ ip }}"
                 },
                 "neighbor": {

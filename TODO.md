@@ -48,6 +48,8 @@
 [x] Allow running ansible worker task to run independently of master task
 [x] Add ansible task to upgrade cluster
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
+[x] PR to helm charts to annotate volumes
+[ ] Write controller to add port forwarding to unifi controller
 [ ] Get off forked docker images
 [ ] Write blog post
 [ ] Install pi-hole

@@ -5,16 +5,12 @@
     - k8s-module
     - glusterfs
 
-- hosts: master
+- hosts: workers[0]
   any_errors_fatal: true
   roles:
     - k8s-module
     - helm
     - ark
-
-- hosts: master
-  any_errors_fatal: true
-  roles:
     - metallb
     - ingress
     - dashboard

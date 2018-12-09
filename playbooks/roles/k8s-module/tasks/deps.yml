@@ -1,4 +1,10 @@
 ---
+- name: apt-get update
+  become: yes
+  become_user: root
+  apt:
+    update_cache: true
+
 - name: install build deps
   become: yes
   become_user: root

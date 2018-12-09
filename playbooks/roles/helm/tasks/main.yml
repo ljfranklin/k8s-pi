@@ -14,7 +14,7 @@
   become: yes
   become_user: root
   unarchive:
-    src: https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-arm.tar.gz
+    src: https://storage.googleapis.com/kubernetes-helm/helm-v2.12.0-linux-arm.tar.gz
     extra_opts:
       - "--strip-components=1"
       - "linux-arm/helm"
@@ -28,6 +28,7 @@
   # manually built from https://github.com/ljfranklin/helm-arm
   shell: >
     helm init
-    --tiller-image=ljfranklin/helm-arm:2.11.0
+    --tiller-image=ljfranklin/helm-arm:2.12.0
     --service-account tiller
+    --upgrade
     --wait

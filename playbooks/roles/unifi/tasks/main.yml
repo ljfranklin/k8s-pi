@@ -12,7 +12,7 @@
     --install
     --values /tmp/unifi-values.yml
     unifi
-    stable/unifi
+    https://storage.googleapis.com/ansible-assets/unifi-0.2.2.tgz
 
 - name: template unifi gateway config
   template:
