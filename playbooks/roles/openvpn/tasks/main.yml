@@ -13,17 +13,3 @@
     --values /tmp/openvpn-values.yml
     openvpn
     https://storage.googleapis.com/ansible-assets/openvpn-annotations-3.12.0.tgz
-
-- register: openvpn_pod
-  shell: >
-    kubectl get pods
-    --selector=app=openvpn
-    -o jsonpath="{.items[0].metadata.name}"
-
-- name: annotate pod for backups
-  shell: >
-    kubectl annotate
-    --overwrite
-    pod
-    {{openvpn_pod.stdout}}
-    backup.ark.heptio.com/backup-volumes=certs
