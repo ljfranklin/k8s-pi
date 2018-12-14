@@ -8,6 +8,26 @@ TODO
 
 TODO
 
+- Set Ingress controller to use NodePort + ExternalIP initially
+  - ExternalIP can be set to IP of any worker node
+- `sudo vim /etc/hosts` to add `$WORKER_IP unifi.$YOUR_DOMAIN`
+- Deploy controller
+- Visit https://unifi.$YOUR_DOMAIN to ensure controller loads
+- `ssh ubnt@192.168.1.1` (password `ubnt`)
+- If gateway was previously paired: `sudo syswrapper.sh restore-default`, then SSH again
+- `set-inform http://$WORKER_IP:8080/inform`
+- Go to Controller UI and click Adopt on Devices tab
+- Wait for Adopting state
+- On gateway enter `set-inform` to save inform URL
+- Wait for device to say Connected on Controller UI
+- Under Controller Setting, create LAN2 network with `192.168.2.1/24` CIDR
+  - This is necessary for BGP
+- Enter forwarding rules on controller for new BGP IP
+- Switch ingress config from NodePort to LoadBalancer
+- Redeploy
+- Remove `$WORKER_IP` line from `/etc/hosts`
+- Done!
+
 ## Ingress
 
 Automatic Let's Encrypt certs blocked on [this issue](https://github.com/jetstack/cert-manager/pull/780).

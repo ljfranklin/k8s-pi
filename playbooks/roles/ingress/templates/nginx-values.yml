@@ -8,6 +8,11 @@ controller:
     repository: ljfranklin/nginx-ingress-controller-arm
     tag: 0.20.0-tcpudp
   service:
+    # Uncomment these lines during initial setup
+    # See Bootstrap Cluster section in README
+    # type: NodePort
+    # externalIPs:
+    #   - {{ansible_default_ipv4.address}}
     type: LoadBalancer
     loadBalancerIP: {{ ingress.nginxStaticIP }}
     annotations:

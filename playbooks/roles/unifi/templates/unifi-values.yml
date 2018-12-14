@@ -15,20 +15,20 @@ ingress:
       - unifi.{{ ingress.domain }}
       secretName: unifi-cert
 controllerService:
-  type: LoadBalancer
-  loadBalancerIP: {{ ingress.nginxStaticIP }}
+  externalIPs:
+    - {{ansible_default_ipv4.address}}
   port: 8080
   annotations:
     metallb.universe.tf/allow-shared-ip: ingress-shared
 stunService:
-  type: LoadBalancer
-  loadBalancerIP: {{ ingress.nginxStaticIP }}
+  externalIPs:
+    - {{ansible_default_ipv4.address}}
   port: 3478
   annotations:
     metallb.universe.tf/allow-shared-ip: ingress-shared
 discoveryService:
-  type: LoadBalancer
-  loadBalancerIP: {{ ingress.nginxStaticIP }}
+  externalIPs:
+    - {{ansible_default_ipv4.address}}
   port: 10001
   annotations:
     metallb.universe.tf/allow-shared-ip: ingress-shared
@@ -36,5 +36,6 @@ persistence:
   enabled: true
   storageClass: gluster-heketi
   accessModes: ReadWriteOnce
+  size: "10Gi"
 podAnnotations:
   backup.ark.heptio.com/backup-volumes: unifi-data

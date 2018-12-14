@@ -11,6 +11,7 @@
     helm upgrade
     --install
     --values /tmp/unifi-values.yml
+    --wait
     unifi
     https://storage.googleapis.com/ansible-assets/unifi-0.2.2.tgz
 
@@ -20,6 +21,12 @@
     dest: /tmp/
     owner: "{{ansible_env.USER}}"
     group: "{{ansible_env.USER}}"
+
+- register: unifi_pod
+  shell: >
+    kubectl get pods
+    --selector=app=unifi
+    -o jsonpath="{.items[0].metadata.name}"
 
 - name: copy unifi gateway config
   shell: >
