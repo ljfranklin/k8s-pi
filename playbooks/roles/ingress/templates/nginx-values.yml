@@ -17,6 +17,7 @@ controller:
     loadBalancerIP: {{ ingress.nginxStaticIP }}
     annotations:
       metallb.universe.tf/allow-shared-ip: ingress-shared
+      port-forwarding.lylefranklin.com/enable: "true"
   extraArgs:
     default-ssl-certificate: kube-system/default-backend-cert-secret
 defaultBackend:

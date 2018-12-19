@@ -8,6 +8,8 @@ service:
   externalPort: 1194
   internalPort: 1194
   loadBalancerIP: {{ ingress.openvpnStaticIP }}
+  annotations:
+    port-forwarding.lylefranklin.com/enable: "true"
 persistence:
   storageClass: gluster-heketi
 podAnnotations:

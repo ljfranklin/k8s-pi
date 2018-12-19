@@ -18,20 +18,14 @@ controllerService:
   externalIPs:
     - {{ansible_default_ipv4.address}}
   port: 8080
-  annotations:
-    metallb.universe.tf/allow-shared-ip: ingress-shared
 stunService:
   externalIPs:
     - {{ansible_default_ipv4.address}}
   port: 3478
-  annotations:
-    metallb.universe.tf/allow-shared-ip: ingress-shared
 discoveryService:
   externalIPs:
     - {{ansible_default_ipv4.address}}
   port: 10001
-  annotations:
-    metallb.universe.tf/allow-shared-ip: ingress-shared
 persistence:
   enabled: true
   storageClass: gluster-heketi
