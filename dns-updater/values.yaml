@@ -2,11 +2,11 @@
 
 image:
   # Repository for container image
-  repository: ljfranklin/dynamic-dns-arm
+  repository: ljfranklin/dynamic-dns
   # Image tag
   tag: latest
   # Image pull policy
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 # when to run the job in cron syntax
 schedule: "*/5 * * * *"

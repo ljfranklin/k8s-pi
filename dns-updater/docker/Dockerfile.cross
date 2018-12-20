@@ -1,4 +1,6 @@
-FROM arm32v6/alpine:latest
+FROM __BASEIMAGE_ARCH__/alpine:3.7
+
+__CROSS_COPY qemu-__QEMU_ARCH__-static /usr/bin/
 
 RUN apk update && \
   apk --no-cache add \

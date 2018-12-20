@@ -50,7 +50,7 @@
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
 [x] PR to helm charts to annotate volumes
 [x] Write controller to add port forwarding to unifi controller
-[ ] Multi-arch the dns-updater
+[x] Multi-arch the dns-updater
 [ ] Write blog post
 [ ] Get off forked docker images
     - Ark: https://github.com/heptio/ark/issues/720 & https://github.com/heptio/ark/issues/638
