@@ -49,7 +49,13 @@
 [x] Add ansible task to upgrade cluster
     - https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/
 [x] PR to helm charts to annotate volumes
-[ ] Write controller to add port forwarding to unifi controller
-[ ] Get off forked docker images
+[x] Write controller to add port forwarding to unifi controller
+[ ] Multi-arch the dns-updater
 [ ] Write blog post
-[ ] Install pi-hole
+[ ] Get off forked docker images
+    - Ark: https://github.com/heptio/ark/issues/720 & https://github.com/heptio/ark/issues/638
+    - Heketi: https://github.com/heketi/heketi/issues/1470
+    - Helm: https://github.com/helm/helm/issues/3269
+    - nginx-ingress: https://github.com/kubernetes/ingress-nginx/issues/3545
+    - cert-manager: https://github.com/jetstack/cert-manager/issues/608
+    - openvpn: hasn't been updated in 2 years

@@ -1,8 +1,7 @@
 ---
 controller:
   image:
-    # pinned to commit which includes prometheus client panic fix but
-    # still includes UDP support...
+    # pinned to avoid this issue https://github.com/kubernetes/ingress-nginx/issues/3545
     # check out github.com/ljfranklin/nginx-ingress
     # make build ARCH=arm && make container ARCH=arm
     repository: ljfranklin/nginx-ingress-controller-arm
