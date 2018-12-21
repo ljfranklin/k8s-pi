@@ -1,4 +1,15 @@
-# Playing around with k8s on Raspberry Pi
+# A "production-grade" k8s on Raspberry Pi
+
+![alt text](https://storage.googleapis.com/ansible-assets/raspberry-pi.jpg "Hardware Pic")
+
+Table of contents:
+- What are we building?
+- Why though?
+- Hardware
+- Networking
+- Flashing SD cards
+- Deploy k8s
+- Backup/Restore
 
 ## Hardware
 
