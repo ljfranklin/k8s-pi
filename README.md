@@ -1,6 +1,6 @@
 # A "production-grade" k8s on Raspberry Pi
 
-![alt text](https://storage.googleapis.com/ansible-assets/raspberry-pi.jpg "Hardware Pic")
+![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi.jpg "Hardware Pic")
 
 Table of contents:
 - What are we building?
