@@ -55,6 +55,7 @@
 [ ] Get off forked docker images
     - Ark: https://github.com/heptio/ark/issues/720 & https://github.com/heptio/ark/issues/638
     - Heketi: https://github.com/heketi/heketi/issues/1470
+    - Gluster: https://github.com/gluster/gluster-containers/issues/112
     - Helm: https://github.com/helm/helm/issues/3269
     - nginx-ingress: https://github.com/kubernetes/ingress-nginx/issues/3545
     - cert-manager: https://github.com/jetstack/cert-manager/issues/608
