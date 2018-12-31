@@ -1,11 +1,11 @@
 ---
-- hosts: workers[-1]
+- hosts: gfs-cluster
   any_errors_fatal: true
   roles:
     - k8s-module
     - glusterfs
 
-- hosts: workers[0]
+- hosts: kube-node[0]
   any_errors_fatal: true
   roles:
     - k8s-module
