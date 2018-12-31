@@ -34,6 +34,8 @@ packages:
 runcmd:
   # force clock sync
   - 'service ntp stop && ntpd -gq && service ntp start'
+  # install HypriotOS GPG key
+  - 'curl -L https://packagecloud.io/Hypriot/rpi/gpgkey | sudo apt-key add -'
   # update to later kernel
   - 'wget -O /tmp/kernel.deb https://storage.googleapis.com/ansible-assets/raspberrypi-kernel_20181109-040429_armhf.deb'
   - 'wget -O /tmp/kernel-headers.deb https://storage.googleapis.com/ansible-assets/raspberrypi-kernel-headers_20181109-040429_armhf.deb'
