@@ -1,19 +1,13 @@
 ---
 controller:
   image:
-    # pinned to avoid this issue https://github.com/kubernetes/ingress-nginx/issues/3545
-    # check out github.com/ljfranklin/nginx-ingress
-    # make build ARCH=arm && make container ARCH=arm
-    repository: ljfranklin/nginx-ingress-controller-arm
-    tag: 0.20.0-tcpudp
+    repository: {{ nginx.image.split(":")[0] }}
+    tag: "{{ nginx.image.split(":")[1] }}"
   service:
-    # Uncomment these lines during initial setup
-    # See Bootstrap Cluster section in README
-    # type: NodePort
-    # externalIPs:
-    #   - {{ansible_default_ipv4.address}}
     type: LoadBalancer
-    loadBalancerIP: {{ ingress.nginxStaticIP }}
+    loadBalancerIP: {{ ingress.static_ip }}
+    externalIPs: # used to access Unifi UI prior to MetalLB setup
+      - {{ansible_default_ipv4.address}}
     annotations:
       metallb.universe.tf/allow-shared-ip: ingress-shared
       port-forwarding.lylefranklin.com/enable: "true"
@@ -21,4 +15,5 @@ controller:
     default-ssl-certificate: kube-system/default-backend-cert-secret
 defaultBackend:
   image:
-    repository: k8s.gcr.io/defaultbackend-arm
+    repository: {{ nginx.backend_image.split(":")[0] }}
+    tag: "{{ nginx.backend_image.split(":")[1] }}"

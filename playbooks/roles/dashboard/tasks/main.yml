@@ -44,7 +44,6 @@
     owner: "{{ansible_env.USER}}"
     group: "{{ansible_env.USER}}"
 
-  # https://github.com/helm/charts/pull/8621
 - name: install dashboard
   shell: >
     helm upgrade
@@ -52,7 +51,7 @@
     --namespace kube-system
     --values /tmp/dashboard-values.yml
     dashboard
-    https://storage.googleapis.com/ansible-assets/kubernetes-dashboard-timeout-fix.tgz
+    stable/kubernetes-dashboard
 
 - name: template admin config
   template:

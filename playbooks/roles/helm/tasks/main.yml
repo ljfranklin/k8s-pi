@@ -14,21 +14,18 @@
   become: yes
   become_user: root
   unarchive:
-    src: https://storage.googleapis.com/kubernetes-helm/helm-v2.12.0-linux-arm.tar.gz
+    src: https://storage.googleapis.com/kubernetes-helm/helm-{{ helm.version }}-linux-{{ helm.arch }}.tar.gz
     extra_opts:
       - "--strip-components=1"
-      - "linux-arm/helm"
+      - "linux-{{ helm.arch }}/helm"
     dest: /usr/local/bin/
     mode: 0755
     remote_src: yes
 
 - name: init helm
-  # no official tiller image for arm yet
-  # https://github.com/helm/helm/issues/3269
-  # manually built from https://github.com/ljfranklin/helm-arm
   shell: >
     helm init
-    --tiller-image=ljfranklin/helm-arm:2.12.0
+    --tiller-image={{ helm.tiller_image }}
     --service-account tiller
     --upgrade
     --wait

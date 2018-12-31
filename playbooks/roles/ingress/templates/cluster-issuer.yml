@@ -6,8 +6,7 @@ metadata:
   namespace: kube-system
 spec:
   acme:
-    # server: https://acme-staging-v02.api.letsencrypt.org/directory
-    server: https://acme-v02.api.letsencrypt.org/directory
+    server: "{{ letsencrypt.server }}"
     email: "{{ letsencrypt.email }}"
     privateKeySecretRef:
       name: letsencrypt-prod

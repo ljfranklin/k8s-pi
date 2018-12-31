@@ -1,7 +1,7 @@
 ---
 image:
-  repository: jacobalberty/unifi
-  tag: arm32v7-beta
+  repository: {{ unifi_image.split(":")[0] }}
+  tag: "{{ unifi_image.split(":")[1] }}"
 ingress:
   enabled: true
   annotations:
@@ -30,6 +30,6 @@ persistence:
   enabled: true
   storageClass: gluster-heketi
   accessModes: ReadWriteOnce
-  size: "10Gi"
+  size: "{{ unifi.storage_size }}"
 podAnnotations:
   backup.ark.heptio.com/backup-volumes: unifi-data

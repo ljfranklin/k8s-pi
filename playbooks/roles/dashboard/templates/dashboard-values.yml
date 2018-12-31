@@ -1,6 +1,7 @@
 ---
 image:
-  repository: k8s.gcr.io/kubernetes-dashboard-arm
+	repository: {{ dashboard.image.split(":")[0] }}
+	tag: "{{ dashboard.image.split(":")[1] }}"
 rbac:
   create: true
 serviceAccount:

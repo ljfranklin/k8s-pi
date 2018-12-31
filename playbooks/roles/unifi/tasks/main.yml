@@ -13,7 +13,7 @@
     --values /tmp/unifi-values.yml
     --wait
     unifi
-    https://storage.googleapis.com/ansible-assets/unifi-0.2.2.tgz
+    stable/unifi
 
 - name: template unifi gateway config
   template:

@@ -10,7 +10,7 @@
   become: yes
   become_user: root
   unarchive:
-    src: https://github.com/heptio/ark/releases/download/v0.9.11/ark-v0.9.11-linux-arm.tar.gz
+    src: https://github.com/heptio/ark/releases/download/{{ ark.version }}/ark-{{ ark.version }}-linux-{{ ark.arch }}.tar.gz
     dest: /usr/local/bin/
     mode: 0755
     remote_src: yes
@@ -22,8 +22,8 @@
     --namespace heptio-ark
     --values /tmp/ark-values.yml
     ark
-    https://storage.googleapis.com/ansible-assets/ark-chart-restic-pr-1.4.8.tgz
+    {{ ark.chart }}
 
 - name: create schedule
   shell: >
-    ark schedule get daily-backups || ark schedule create daily-backups --schedule "0 7 * * *" --ttl "336h0m0s"
+    ark schedule get daily-backups || ark schedule create daily-backups --schedule "{{ backup.schedule }}" --ttl "{{ backup.ttl }}"

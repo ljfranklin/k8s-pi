@@ -1,0 +1,31 @@
+# REQUIRED
+ingress:
+  static_ip:
+  domain:
+
+letsencrypt:
+  email:
+  server: https://acme-v02.api.letsencrypt.org/directory
+  # use staging server for testing
+  # server: https://acme-staging-v02.api.letsencrypt.org/directory
+  challenge_provider: cf-dns
+
+cloudflare:
+  email:
+  api_token:
+  zone:
+  domain:
+
+# OPTIONAL
+nginx:
+	# pinned to avoid this issue https://github.com/kubernetes/ingress-nginx/issues/3545
+	# check out github.com/ljfranklin/nginx-ingress
+	# make build ARCH=arm && make container ARCH=arm
+  image: ljfranklin/nginx-ingress-controller-arm:0.20.0-tcpudp
+  backend_image: k8s.gcr.io/defaultbackend-arm:1.4
+
+cert_manager:
+	# manually build on raspberry pi
+	# https://github.com/ljfranklin/cert-manager/tree/multi-arch
+	# make build GOARCH=arm
+  image: ljfranklin/cert-manager-controller-arm:latest

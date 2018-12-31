@@ -1,11 +1,11 @@
 ---
 configInline:
   peers:
-  - peer-address: "{{ ansible_default_ipv4.gateway }}"
-    peer-asn: 64512
-    my-asn: 64512
+  - peer-address: "{{ metallb.peer_address }}"
+    peer-asn: {{ metallb.peer_asn }}
+    my-asn: {{ metallb.peer_asn }}
   address-pools:
   - name: default
     protocol: bgp
     addresses:
-    - "{{ ansible_default_ipv4.gateway }}/24"
+    - "{{ metallb.peer_address }}/24"

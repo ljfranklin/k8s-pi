@@ -1,6 +1,7 @@
 ---
 image:
-  repository: k8s.gcr.io/heapster-arm
+  repository: {{ heapster.image.split(":")[0] }}
+  tag: "{{ heapster.image.split(":")[1] }}"
 rbac:
   create: false
   serviceAccountName: heapster-custom-fix

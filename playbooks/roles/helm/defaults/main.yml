@@ -1,0 +1,7 @@
+helm:
+  version: v2.12.0
+  arch: arm
+  # no official tiller image for arm yet
+  # https://github.com/helm/helm/issues/3269
+  # manually built from https://github.com/ljfranklin/helm-arm
+	tiller_image: ljfranklin/helm-arm:2.12.0

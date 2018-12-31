@@ -12,4 +12,4 @@
     --install
     --values /tmp/openvpn-values.yml
     openvpn
-    https://storage.googleapis.com/ansible-assets/openvpn-annotations-3.12.1.tgz
+    {{ openvpn.chart }}

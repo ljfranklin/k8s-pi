@@ -12,4 +12,4 @@
     --install
     --values /tmp/port-forwarding-values.yml
     port-forwarding
-    https://storage.googleapis.com/ansible-assets/port-forwarding-0.1.0.tgz
+    {{ port_forwarding.chart }}

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: influxdb
-        image: k8s.gcr.io/heapster-influxdb-arm:v1.5.2
+        image: {{ influxdb.image }}
         volumeMounts:
         - mountPath: /data
           name: influxdb-storage
@@ -28,8 +28,6 @@ kind: Service
 metadata:
   labels:
     task: monitoring
-    # For use as a Cluster add-on (https://github.com/kubernetes/kubernetes/tree/master/cluster/addons)
-    # If you are NOT using this as an addon, you should comment out this line.
     kubernetes.io/cluster-service: 'true'
     kubernetes.io/name: monitoring-influxdb
   name: monitoring-influxdb

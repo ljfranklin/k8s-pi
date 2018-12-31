@@ -1,0 +1,11 @@
+# REQUIRED
+ingress:
+  domain:
+
+unifi:
+  username:
+  password:
+
+# OPTIONAL
+port_forwarding:
+  chart: https://storage.googleapis.com/ansible-assets/port-forwarding-0.1.0.tgz

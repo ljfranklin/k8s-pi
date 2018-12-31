@@ -1,15 +1,13 @@
 ---
 image:
-  # built from https://github.com/ljfranklin/ark/tree/arm-0.9
-  repository: ljfranklin/ark-arm
-  tag: 0.9.11
+  repository: {{ ark.image.split(":")[0] }}
+  tag: "{{ ark.image.split(":")[1] }}"
 configuration:
-  # uncomment this line if restoring from backup
-  # restoreOnlyMode: true
+  restoreOnlyMode: {{ backup.restore_only_mode }}
   backupStorageProvider:
     name: {{ backup.provider }}
     bucket: {{ backup.bucket }}
-    resticLocation: {{ backup.volumesBucket }}
+    resticLocation: {{ backup.volumes_bucket }}
 credentials:
   secretContents:
     {{ backup.provider}}: |
