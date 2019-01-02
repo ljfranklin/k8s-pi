@@ -1,0 +1,29 @@
+---
+- hosts: all
+  any_errors_fatal: true
+  roles:
+    - common
+
+- hosts: kube-master
+  any_errors_fatal: true
+  roles:
+    - reset-master
+
+- hosts: kube-master[0]
+  any_errors_fatal: true
+  become: yes
+  become_user: root
+  roles:
+    - download-kube-config
+
+- hosts: all
+  any_errors_fatal: true
+  roles:
+    - upload-kube-config
+
+- hosts: kube-node
+  any_errors_fatal: true
+  roles:
+    - reset-worker
+
+- import_playbook: upgrade.yml

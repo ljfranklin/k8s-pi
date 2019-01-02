@@ -1,0 +1,16 @@
+---
+- hosts: all
+  any_errors_fatal: true
+  roles:
+    - common
+
+- hosts: kube-master
+  any_errors_fatal: true
+  roles:
+    - upgrade-master
+
+- hosts: kube-node
+  roles:
+    - upgrade-worker
+
+- import_playbook: deploy.yml
