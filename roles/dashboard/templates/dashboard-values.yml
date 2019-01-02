@@ -1,7 +1,7 @@
 ---
 image:
-	repository: {{ dashboard_image.split(":")[0] }}
-	tag: "{{ dashboard_image.split(":")[1] }}"
+  repository: {{ dashboard_image.split(":")[0] }}
+  tag: "{{ dashboard_image.split(":")[1] }}"
 rbac:
   create: true
 serviceAccount:

@@ -7,7 +7,7 @@
 - register: token_cmd
   become: yes
   become_user: root
-  delegate_to: "{{ groups['master'][0] }}"
+  delegate_to: "{{ groups['kube-master'][0] }}"
   shell: >
     kubeadm
     token create
@@ -19,5 +19,5 @@
   shell: >
     kubeadm
     join
-    --tls-bootstrap-token "{{ token_cmd.stdout }}"
+    --token "{{ token_cmd.stdout }}"
     --discovery-file "{{ansible_env.HOME}}/.kube/config"

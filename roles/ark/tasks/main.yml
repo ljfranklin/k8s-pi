@@ -7,6 +7,8 @@
     group: "{{ansible_env.USER}}"
 
 - name: install ark cli
+  become: yes
+  become_user: root
   unarchive:
     src: https://github.com/heptio/ark/releases/download/{{ ark_version }}/ark-{{ ark_version }}-linux-{{ ark_arch }}.tar.gz
     dest: /usr/local/bin/

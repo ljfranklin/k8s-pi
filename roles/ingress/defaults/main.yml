@@ -1,5 +1,5 @@
 # REQUIRED
-ingress_static_ip:
+ingress_nginx_static_ip:
 ingress_domain:
 
 letsencrypt_email:

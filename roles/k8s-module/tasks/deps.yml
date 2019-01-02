@@ -1,13 +1,19 @@
 ---
 - name: apt-get update
+  become: yes
+  become_user: root
   apt:
     update_cache: true
 
 - name: install build deps
+  become: yes
+  become_user: root
   apt:
     name: build-essential,python-dev,libffi-dev,libssl-dev
 
 - name: update pip
+  become: yes
+  become_user: root
   pip:
     name: pip
     extra_args: "-U"
@@ -26,12 +32,16 @@
     remote_src: yes
 
 - name: install k8s deps (arm)
+  become: yes
+  become_user: root
   when: ansible_architecture == "armv7l"
   pip:
     name: openshift
     extra_args: "--no-index --find-links=/tmp/openshift-wheelhouse"
 
 - name: install k8s deps (x86_64)
+  become: yes
+  become_user: root
   when: ansible_architecture != "armv7l"
   pip:
     name: openshift

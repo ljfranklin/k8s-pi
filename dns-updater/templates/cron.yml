@@ -30,12 +30,12 @@ spec:
             - name: CLOUDFLARE_EMAIL
               valueFrom:
                 secretKeyRef:
-                  name: cloudflare
+                  name: {{ .Release.Name }}-secret
                   key: email
             - name: CLOUDFLARE_API_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: cloudflare
+                  name: {{ .Release.Name }}-secret
                   key: api_token
             volumeMounts:
             - name: config-volume

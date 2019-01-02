@@ -5,7 +5,7 @@ controller:
     tag: "{{ nginx_image.split(":")[1] }}"
   service:
     type: LoadBalancer
-    loadBalancerIP: {{ ingress_static_ip }}
+    loadBalancerIP: {{ ingress_nginx_static_ip }}
     externalIPs: # used to access Unifi UI prior to MetalLB setup
       - {{ansible_default_ipv4.address}}
     annotations:

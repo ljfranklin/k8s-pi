@@ -6,8 +6,8 @@
                     "router-id": "{{ metallb_peer_address }}"
                 },
                 "neighbor": {
-{% for host in groups['workers'] %}
-                    "{{ host }}": {
+{% for host in groups['kube-node'] %}
+                    "{{ hostvars[host]['ansible_host'] }}": {
                         "remote-as": "{{ metallb_peer_asn }}"
                     }{% if not loop.last %},{% endif %}
 

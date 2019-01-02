@@ -1,9 +1,0 @@
----
-- name: reset master
-  become: yes
-  become_user: root
-  shell: kubeadm reset -f
-- name: init k8s
-  become: yes
-  become_user: root
-  shell: kubeadm init

@@ -1,6 +1,0 @@
-
-- name: copy kubectl from tmp
-  copy:
-    src: "{{ lookup('env', 'PWD') }}/tmp/kubectl"
-    dest: /usr/local/bin/kubectl
-    mode: "0755"

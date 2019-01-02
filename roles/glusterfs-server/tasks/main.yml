@@ -1,5 +1,7 @@
 ---
 - name: install heketi CLI
+  become: yes
+  become_user: root
   unarchive:
     src: https://github.com/heketi/heketi/releases/download/{{ heketi_version }}/heketi-client-{{ heketi_version }}.linux.{{ heketi_arch }}.tar.gz
     extra_opts:

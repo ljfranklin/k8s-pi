@@ -1,0 +1,16 @@
+---
+- name: upgrade node
+  become: yes
+  become_user: root
+  shell: >
+    kubeadm upgrade
+    node config
+    --kubelet-version "$(kubelet --version | cut -d ' ' -f 2)"
+
+- name: restart kubelet
+  become: yes
+  become_user: root
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: kubelet

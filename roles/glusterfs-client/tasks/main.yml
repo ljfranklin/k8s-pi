@@ -1,10 +1,14 @@
 ---
 - name: load dm modules at boot
+  become: yes
+  become_user: root
   copy:
     src: dm_snapshot.conf
     dest: /etc/modules-load.d/dm_snapshot.conf
 
 - name: load dm modules
+  become: yes
+  become_user: root
   modprobe: name={{item}}
   with_items:
     - dm_snapshot
@@ -12,6 +16,8 @@
     - dm_thin_pool
 
 - name: install glusterfs-client
+  become: yes
+  become_user: root
   apt:
     name: glusterfs-client
     state: latest
