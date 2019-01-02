@@ -32,10 +32,17 @@ Create `.gitignore`:
 ```
 cat << EOF > .gitignore
 /secrets/
-/pi/tmp/
 /tmp/
 *.retry
 EOF
+```
+
+Clone `kubespray` and `k8s-pi` repos as submodules:
+
+```
+mkdir submodules
+git submodule add https://github.com/kubernetes-sigs/kubespray.git ./submodules/kubespray
+git submodule add https://github.com/ljfranklin/k8s-pi.git ./submodules/k8s-pi
 ```
 
 #### Flash HypriotOS onto SD cards
@@ -53,18 +60,10 @@ ssh-keygen -t rsa -b 4096 -C k8s -N '' -f ~/.ssh/id_rsa_k8s
 ssh-add ~/.ssh/id_rsa_k8s
 ```
 
-Download some helper scripts from [this directory](https://github.com/ljfranklin/k8s-pi/tree/master/pi):
-
-```
-wget -O /tmp/pi.zip https://github.com/ljfranklin/k8s-pi/archive/master.zip
-unzip -d /tmp /tmp/pi.zip
-cp -r /tmp/k8s-pi-master/pi .
-```
-
 Plug a microSD card into your workstation (this example assumes the card has the device ID `/dev/sda`), then run the following command:
 
 ```
-./pi/provision.sh -d /dev/sda -n k8s-node1 -p "$(cat ~/.ssh/id_rsa_k8s.pub)" -i 192.168.1.100
+./submodules/k8s-pi/pi/provision.sh -d /dev/sda -n k8s-node1 -p "$(cat ~/.ssh/id_rsa_k8s.pub)" -i 192.168.1.100
 ```
 
 > Note: the SD card must be unmounted prior to running the script
@@ -72,7 +71,7 @@ Plug a microSD card into your workstation (this example assumes the card has the
 Unplug the microSD card and plug in the next one. Run the script again but increment the node number and IP:
 
 ```
-./pi/provision.sh -d /dev/sda -n k8s-node2 -p "$(cat ~/.ssh/id_rsa_k8s.pub)" -i 192.168.1.101
+./submodules/k8s-pi/pi/provision.sh -d /dev/sda -n k8s-node2 -p "$(cat ~/.ssh/id_rsa_k8s.pub)" -i 192.168.1.101
 ```
 
 Repeat the process until all cards have been flashed.
@@ -101,13 +100,6 @@ Remember to add these hosts under the `[gfs-cluster]` section in `hosts.ini` as 
 
 #### Installing k8s
 
-Clone `kubespray` repo as submodule:
-
-```
-mkdir submodules
-git submodule add https://github.com/kubernetes-sigs/kubespray.git ./submodules/kubespray
-```
-
 Create `ansible.cfg` file in project root:
 
 ```
@@ -116,7 +108,7 @@ cat << EOF > ansible.cfg
 host_key_checking     = False
 remote_user           = k8s
 library               = submodules/kubespray/library/
-roles_path            = submodules/kubespray/roles/
+roles_path            = submodules/kubespray/roles/:submodules/k8s-pi/roles/
 display_skipped_hosts = False
 deprecation_warnings  = False
 
@@ -130,6 +122,7 @@ Install ansible + deps:
 
 ```
 sudo pip install -r submodules/kubespray/requirements.txt
+sudo pip install -r submodules/kubespray/contrib/network-storage/heketi/requirements.txt
 ```
 
 Create inventory file containing host information:
@@ -144,7 +137,7 @@ node2 ansible_host=192.168.1.101
 node3 ansible_host=192.168.1.102
 node4 ansible_host=192.168.1.103
 node5 ansible_host=192.168.1.104
-node6 ansible_host=192.168.1.105 disk_volume_device_1=/dev/sda
+node6 ansible_host=192.168.1.105
 
 [kube-master]
 node1
@@ -164,7 +157,7 @@ kube-master
 kube-node
 
 [gfs-cluster]
-node6
+node6 volume_device=/dev/sda
 EOF
 ```
 
@@ -201,6 +194,9 @@ dashboard_enabled: false         # we'll install this later on
 # https://github.com/kubernetes/kubernetes/issues/72447
 kube_version: v1.12.4
 # kube_version: v1.13.1
+
+# edit inventory/group_vars/all/docker.yml
+docker_iptables_enabled: true
 ```
 
 Create a `cluster.yml` playbook in the project root:
@@ -210,15 +206,22 @@ cat << EOF > cluster.yml
 - name: Include kubespray tasks
   import_playbook: submodules/kubespray/cluster.yml
 
-- name: Include glusterfs tasks
-  import_playbook: submodules/kubespray/contrib/network-storage/glusterfs/glusterfs.yml
+- name: Include k8s-pi tasks
+  import_playbook: submodules/k8s-pi/deploy.yml
 EOF
+```
+
+Create a `secrets.yml` file and fill in your credentials for the deployed services:
+
+```
+mkdir -p secrets
+cp submodules/k8s-pi/secrets/secrets.sample secrets/secrets.yml
 ```
 
 Run the playbook to start the installation:
 
 ```
-ansible-playbook -i inventory/hosts.ini --become --become-user=root cluster.yml
+ansible-playbook -i inventory/hosts.ini --extra-vars @secrets/secrets.yml --become --become-user=root cluster.yml
 ```
 
 ## Bootstrap cluster
