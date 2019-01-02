@@ -1,0 +1,22 @@
+# REQUIRED
+
+# inventory file should specify `volume_device` key, e.g.
+# [gfs-cluster]
+# node6 ansible_host=192.168.1.105 volume_device=/dev/sda
+
+glusterfs_admin_key:
+glusterfs_user_key:
+
+# OPTIONAL
+glusterfs_arch: arm
+# manually build from https://github.com/gluster/gluster-containers/blob/master/Fedora/Dockerfile
+# Replace 'x86_64' with 'arm32v7'
+glusterfs_image: ljfranklin/gluster-fedora-arm:latest
+# for amd64
+# glusterfs_image: gluster/gluster-centos:latest
+heketi_version: v8.0.0
+heketi_arch: arm
+# manually build with https://github.com/heketi/heketi/blob/master/extras/docker/rpi/build-rpi-dockerfile.sh
+heketi_image: ljfranklin/heketi-rpi:latest
+# for amd64
+# heketi_image: heketi/heketi:dev

@@ -1,25 +1,7 @@
 ---
-- name: load dm modules at boot
-  become: yes
-  become_user: root
-  copy:
-    src: dm_snapshot.conf
-    dest: /etc/modules-load.d/dm_snapshot.conf
-
-- name: load dm modules
-  become: yes
-  become_user: root
-  modprobe: name={{item}}
-  with_items:
-    - dm_snapshot
-    - dm_mirror
-    - dm_thin_pool
-
 - name: install heketi CLI
-  become: yes
-  become_user: root
   unarchive:
-    src: https://github.com/heketi/heketi/releases/download/{{ heketi.version }}/heketi-client-{{ heketi.version }}.linux.{{ heketi.arch }}.tar.gz
+    src: https://github.com/heketi/heketi/releases/download/{{ heketi_version }}/heketi-client-{{ heketi_version }}.linux.{{ heketi_arch }}.tar.gz
     extra_opts:
       - "--strip-components=2"
       - "heketi-client/bin/heketi-cli"
@@ -32,24 +14,25 @@
     repo: https://github.com/gluster/gluster-kubernetes.git
     dest: /tmp/gluster-kubernetes
     force: true
+    version: e50a62cda8cda155893afbd124bd9b17602ae471
 
 - replace:
     path: /tmp/gluster-kubernetes/deploy/kube-templates/glusterfs-daemonset.yaml
     regexp: 'gluster/gluster-centos:latest'
-    replace: {{ glusterfs.image }}
+    replace: "{{ glusterfs_image }}"
 
 - replace:
     path: /tmp/gluster-kubernetes/deploy/kube-templates/heketi-deployment.yaml
     regexp: 'heketi/heketi:dev'
-    replace: {{ heketi.image }}
+    replace: "{{ heketi_image }}"
 - replace:
     path: /tmp/gluster-kubernetes/deploy/kube-templates/deploy-heketi-deployment.yaml
     regexp: 'heketi/heketi:dev'
-    replace: {{ heketi.image }}
+    replace: "{{ heketi_image }}"
 - replace:
     path: /tmp/gluster-kubernetes/deploy/gk-deploy
     regexp: 'setup-openshift-heketi-storage'
-    replace: 'setup-openshift-heketi-storage --image {{ heketi.image }}'
+    replace: 'setup-openshift-heketi-storage --image {{ heketi_image }}'
 
 - name: template topology file
   template:
@@ -59,16 +42,14 @@
     group: "{{ansible_env.USER}}"
 
 - name: run gk-deploy
-  become: yes
-  become_user: root
   command: >
     ./gk-deploy
     --deploy-gluster
     --cli kubectl
     --namespace kube-system
-    --admin-key '{{glusterfs.admin_key}}'
-    --user-key '{{glusterfs.user_key}}'
-    {%- if groups['gfs-cluster'] | length == 1 -%}--single-node{%- endif -%}
+    --admin-key '{{glusterfs_admin_key}}'
+    --user-key '{{glusterfs_user_key}}'
+    {% if groups['gfs-cluster'] | length == 1 -%}--single-node{%- endif %}
     --no-object
     -y
     /tmp/topology.json

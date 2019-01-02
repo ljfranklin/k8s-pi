@@ -1,7 +1,7 @@
 ---
 image:
-	repository: {{ dashboard.image.split(":")[0] }}
-	tag: "{{ dashboard.image.split(":")[1] }}"
+	repository: {{ dashboard_image.split(":")[0] }}
+	tag: "{{ dashboard_image.split(":")[1] }}"
 rbac:
   create: true
 serviceAccount:
@@ -13,10 +13,10 @@ ingress:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     kubernetes.io/tls-acme: "true"
   hosts:
-    - k8s.{{ ingress.domain }}
+    - k8s.{{ ingress_domain }}
   tls:
     - hosts:
-      - k8s.{{ ingress.domain }}
+      - k8s.{{ ingress_domain }}
       secretName: dashboard-cert
 livenessProbe:
   initialDelaySeconds: 120

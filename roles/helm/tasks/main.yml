@@ -11,13 +11,11 @@
     src: /tmp/service-account.yml
 
 - name: install helm cli
-  become: yes
-  become_user: root
   unarchive:
-    src: https://storage.googleapis.com/kubernetes-helm/helm-{{ helm.version }}-linux-{{ helm.arch }}.tar.gz
+    src: https://storage.googleapis.com/kubernetes-helm/helm-{{ helm_version }}-linux-{{ helm_arch }}.tar.gz
     extra_opts:
       - "--strip-components=1"
-      - "linux-{{ helm.arch }}/helm"
+      - "linux-{{ helm_arch }}/helm"
     dest: /usr/local/bin/
     mode: 0755
     remote_src: yes
@@ -25,7 +23,7 @@
 - name: init helm
   shell: >
     helm init
-    --tiller-image={{ helm.tiller_image }}
+    --tiller-image={{ helm_tiller_image }}
     --service-account tiller
     --upgrade
     --wait

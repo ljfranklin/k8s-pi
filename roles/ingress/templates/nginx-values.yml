@@ -1,11 +1,11 @@
 ---
 controller:
   image:
-    repository: {{ nginx.image.split(":")[0] }}
-    tag: "{{ nginx.image.split(":")[1] }}"
+    repository: {{ nginx_image.split(":")[0] }}
+    tag: "{{ nginx_image.split(":")[1] }}"
   service:
     type: LoadBalancer
-    loadBalancerIP: {{ ingress.static_ip }}
+    loadBalancerIP: {{ ingress_static_ip }}
     externalIPs: # used to access Unifi UI prior to MetalLB setup
       - {{ansible_default_ipv4.address}}
     annotations:
@@ -15,5 +15,5 @@ controller:
     default-ssl-certificate: kube-system/default-backend-cert-secret
 defaultBackend:
   image:
-    repository: {{ nginx.backend_image.split(":")[0] }}
-    tag: "{{ nginx.backend_image.split(":")[1] }}"
+    repository: {{ nginx_backend_image.split(":")[0] }}
+    tag: "{{ nginx_backend_image.split(":")[1] }}"

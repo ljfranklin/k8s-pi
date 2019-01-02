@@ -12,4 +12,4 @@
     --install
     --values /tmp/port-forwarding-values.yml
     port-forwarding
-    {{ port_forwarding.chart }}
+    {{ port_forwarding_chart }}

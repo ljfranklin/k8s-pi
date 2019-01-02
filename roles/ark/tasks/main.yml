@@ -7,10 +7,8 @@
     group: "{{ansible_env.USER}}"
 
 - name: install ark cli
-  become: yes
-  become_user: root
   unarchive:
-    src: https://github.com/heptio/ark/releases/download/{{ ark.version }}/ark-{{ ark.version }}-linux-{{ ark.arch }}.tar.gz
+    src: https://github.com/heptio/ark/releases/download/{{ ark_version }}/ark-{{ ark_version }}-linux-{{ ark_arch }}.tar.gz
     dest: /usr/local/bin/
     mode: 0755
     remote_src: yes
@@ -22,8 +20,8 @@
     --namespace heptio-ark
     --values /tmp/ark-values.yml
     ark
-    {{ ark.chart }}
+    {{ ark_chart }}
 
 - name: create schedule
   shell: >
-    ark schedule get daily-backups || ark schedule create daily-backups --schedule "{{ backup.schedule }}" --ttl "{{ backup.ttl }}"
+    ark schedule get daily-backups || ark schedule create daily-backups --schedule "{{ backup_schedule }}" --ttl "{{ backup_ttl }}"

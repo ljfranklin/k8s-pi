@@ -12,4 +12,4 @@
     --install
     --values /tmp/openvpn-values.yml
     openvpn
-    {{ openvpn.chart }}
+    {{ openvpn_chart }}

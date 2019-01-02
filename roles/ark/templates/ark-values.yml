@@ -1,14 +1,14 @@
 ---
 image:
-  repository: {{ ark.image.split(":")[0] }}
-  tag: "{{ ark.image.split(":")[1] }}"
+  repository: {{ ark_image.split(":")[0] }}
+  tag: "{{ ark_image.split(":")[1] }}"
 configuration:
-  restoreOnlyMode: {{ backup.restore_only_mode }}
+  restoreOnlyMode: {{ backup_restore_only_mode }}
   backupStorageProvider:
-    name: {{ backup.provider }}
-    bucket: {{ backup.bucket }}
-    resticLocation: {{ backup.volumes_bucket }}
+    name: {{ backup_provider }}
+    bucket: {{ backup_bucket }}
+    resticLocation: {{ backup_volumes_bucket }}
 credentials:
   secretContents:
-    {{ backup.provider}}: |
-      {{ backup.credentials | indent(width=6) }}
+    {{ backup_provider}}: |
+      {{ backup_credentials | indent(width=6) }}

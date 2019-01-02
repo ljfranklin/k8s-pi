@@ -1,9 +1,9 @@
 ---
 image:
-  repository: {{ cert_manager.image.split(":")[0] }}
-  tag: "{{ cert_manager.image.split(":")[1] }}"
+  repository: {{ cert_manager_image.split(":")[0] }}
+  tag: "{{ cert_manager_image.split(":")[1] }}"
 ingressShim:
   defaultIssuerName: letsencrypt-prod
   defaultIssuerKind: ClusterIssuer
   defaultACMEChallengeType: dns01
-  defaultACMEDNS01ChallengeProvider: {{ letsencrypt.challenge_provider }}
+  defaultACMEDNS01ChallengeProvider: {{ letsencrypt_challenge_provider }}

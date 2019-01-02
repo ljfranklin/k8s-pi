@@ -1,4 +1,3 @@
 # OPTIONAL
-metallb:
-  peer_asn: 64512
-  peer_address: "{{ ansible_default_ipv4.gateway }}"
+metallb_peer_asn: 64512
+metallb_peer_address: "{{ ansible_default_ipv4.gateway }}"

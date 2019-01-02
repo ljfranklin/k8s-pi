@@ -1,14 +1,14 @@
 {
     "protocols": {
         "bgp": {
-            "{{ metallb.peer_asn }}": {
+            "{{ metallb_peer_asn }}": {
                 "parameters": {
-                    "router-id": "{{ metallb.peer_address }}"
+                    "router-id": "{{ metallb_peer_address }}"
                 },
                 "neighbor": {
 {% for host in groups['workers'] %}
                     "{{ host }}": {
-                        "remote-as": "{{ metallb.peer_asn }}"
+                        "remote-as": "{{ metallb_peer_asn }}"
                     }{% if not loop.last %},{% endif %}
 
 {% endfor %}

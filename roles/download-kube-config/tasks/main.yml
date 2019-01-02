@@ -1,0 +1,11 @@
+# required by synchronize module
+- name: install rsync
+  apt:
+    name: rsync
+    state: latest
+
+- name: download kubectl to tmp/
+  synchronize:
+    mode: pull
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ lookup('env', 'PWD') }}/secrets/"

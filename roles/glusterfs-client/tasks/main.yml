@@ -1,0 +1,17 @@
+---
+- name: load dm modules at boot
+  copy:
+    src: dm_snapshot.conf
+    dest: /etc/modules-load.d/dm_snapshot.conf
+
+- name: load dm modules
+  modprobe: name={{item}}
+  with_items:
+    - dm_snapshot
+    - dm_mirror
+    - dm_thin_pool
+
+- name: install glusterfs-client
+  apt:
+    name: glusterfs-client
+    state: latest

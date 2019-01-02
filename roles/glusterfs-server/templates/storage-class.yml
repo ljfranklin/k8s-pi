@@ -7,5 +7,5 @@ provisioner: kubernetes.io/glusterfs
 parameters:
   resturl: "{{HEKETI_CLI_SERVER}}"
   restuser: "admin"
-  restuserkey: "{{glusterfs.admin_key}}"
+  restuserkey: "{{glusterfs_admin_key}}"
   volumetype: "none"

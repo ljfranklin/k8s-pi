@@ -1,11 +1,11 @@
 ---
 configInline:
   peers:
-  - peer-address: "{{ metallb.peer_address }}"
-    peer-asn: {{ metallb.peer_asn }}
-    my-asn: {{ metallb.peer_asn }}
+  - peer-address: "{{ metallb_peer_address }}"
+    peer-asn: {{ metallb_peer_asn }}
+    my-asn: {{ metallb_peer_asn }}
   address-pools:
   - name: default
     protocol: bgp
     addresses:
-    - "{{ metallb.peer_address }}/24"
+    - "{{ metallb_peer_address }}/24"

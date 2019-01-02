@@ -1,15 +1,14 @@
 # REQUIRED
-ingress:
-  openvpn_static_ip:
+ingress_openvpn_static_ip:
 
 # OPTIONAL
-openvpn:
-  image: ljfranklin/openvpn-docker-arm:latest
-	# gives access to container network and host network
-	pod_network: 10.244.0.0
-	pod_subnet: 255.255.0.0
-	svc_network: "{{ (ansible_default_ipv4.address.split('.')[:3]|join('.')) + '.0' }}"
-	svc_subnet: 255.255.255.0
-	# needed until this PR is merged
-	# https://github.com/helm/charts/pull/9835
-	chart: https://storage.googleapis.com/ansible-assets/openvpn-annotations-3.12.1.tgz
+
+openvpn_image: ljfranklin/openvpn-docker-arm:latest
+# gives access to container network and host network
+openvpn_pod_network: 10.244.0.0
+openvpn_pod_subnet: 255.255.0.0
+openvpn_svc_network: "{{ (ansible_default_ipv4.address.split('.')[:3]|join('.')) + '.0' }}"
+openvpn_svc_subnet: 255.255.255.0
+# needed until this PR is merged
+# https://github.com/helm/charts/pull/9835
+openvpn_chart: https://storage.googleapis.com/ansible-assets/openvpn-annotations-3.12.1.tgz

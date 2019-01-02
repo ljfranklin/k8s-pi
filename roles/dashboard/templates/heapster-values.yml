@@ -1,7 +1,7 @@
 ---
 image:
-  repository: {{ heapster.image.split(":")[0] }}
-  tag: "{{ heapster.image.split(":")[1] }}"
+  repository: {{ heapster_image.split(":")[0] }}
+  tag: "{{ heapster_image.split(":")[1] }}"
 rbac:
   create: false
   serviceAccountName: heapster-custom-fix

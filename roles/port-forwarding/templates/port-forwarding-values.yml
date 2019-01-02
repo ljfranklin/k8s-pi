@@ -1,5 +1,5 @@
 ---
 router:
-  url: https://unifi.{{ ingress.domain }}
-  username: {{ unifi.username }}
-  password: {{ unifi.password }}
+  url: https://unifi.{{ ingress_domain }}
+  username: {{ unifi_username }}
+  password: {{ unifi_password }}

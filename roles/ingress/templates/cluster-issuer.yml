@@ -6,15 +6,15 @@ metadata:
   namespace: kube-system
 spec:
   acme:
-    server: "{{ letsencrypt.server }}"
-    email: "{{ letsencrypt.email }}"
+    server: "{{ letsencrypt_server }}"
+    email: "{{ letsencrypt_email }}"
     privateKeySecretRef:
       name: letsencrypt-prod
     dns01:
       providers:
         - name: cf-dns
           cloudflare:
-            email: "{{ cloudflare.email }}"
+            email: "{{ cloudflare_email }}"
             apiKeySecretRef:
               name: dns-updater-secret
               key: api_token

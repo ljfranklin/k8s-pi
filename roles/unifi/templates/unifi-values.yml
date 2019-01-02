@@ -9,10 +9,10 @@ ingress:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     kubernetes.io/tls-acme: "true"
   hosts:
-    - unifi.{{ ingress.domain }}
+    - unifi.{{ ingress_domain }}
   tls:
     - hosts:
-      - unifi.{{ ingress.domain }}
+      - unifi.{{ ingress_domain }}
       secretName: unifi-cert
 controllerService:
   externalIPs:
@@ -30,6 +30,6 @@ persistence:
   enabled: true
   storageClass: gluster-heketi
   accessModes: ReadWriteOnce
-  size: "{{ unifi.storage_size }}"
+  size: "{{ unifi_storage_size }}"
 podAnnotations:
   backup.ark.heptio.com/backup-volumes: unifi-data

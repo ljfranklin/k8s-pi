@@ -7,13 +7,13 @@ metadata:
 spec:
   secretName: default-backend-cert-secret
   dnsNames:
-  - "*.{{ ingress.domain }}"
+  - "*.{{ ingress_domain }}"
   acme:
     config:
     - dns01:
         provider: cf-dns
       domains:
-      - "*.{{ ingress.domain }}"
+      - "*.{{ ingress_domain }}"
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer

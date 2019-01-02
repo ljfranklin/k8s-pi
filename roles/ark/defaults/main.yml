@@ -1,22 +1,21 @@
 # REQUIRED
-backup:
-  provider: gcp
-  # create service account, then run following for both buckets:
-  # gsutil iam ch serviceAccount:$SERVICE_ACCOUNT_EMAIL:objectAdmin gs://${BUCKET}
-  credentials:
-  bucket:
-  volumes_bucket:
-  schedule: "0 7 * * *"
-  ttl: 336h0m0s
-  # set to 'true' to restore from backup
-  restore_only_mode: false
+backup_provider: gcp
+# create service account, then run following for both buckets:
+# gsutil iam ch serviceAccount:$SERVICE_ACCOUNT_EMAIL:objectAdmin gs://${BUCKET}
+backup_credentials:
+backup_bucket:
+backup_volumes_bucket:
 
 # OPTIONAL
-ark:
-  version: v0.9.11
-  arch: arm
-	# built from https://github.com/ljfranklin/ark/tree/arm-0.9
-	image: ljfranklin/ark-arm:0.9.11
-	# based on PR which adds restic support to chart
-	# https://github.com/helm/charts/pull/7727
-  chart: https://storage.googleapis.com/ansible-assets/ark-chart-restic-pr-1.4.8.tgz
+backup_schedule: "0 7 * * *"
+backup_ttl: 336h0m0s
+# set to 'true' to restore from backup
+backup_restore_only_mode: false
+
+ark_version: v0.9.11
+ark_arch: arm
+# built from https://github.com/ljfranklin/ark/tree/arm-0.9
+ark_image: ljfranklin/ark-arm:0.9.11
+# based on PR which adds restic support to chart
+# https://github.com/helm/charts/pull/7727
+ark_chart: https://storage.googleapis.com/ansible-assets/ark-chart-restic-pr-1.4.8.tgz

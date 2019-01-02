@@ -1,9 +1,22 @@
 ---
+- hosts: kube-master[0]
+  any_errors_fatal: true
+  roles:
+    - download-kube-config
+    - download-kubectl
+
+- hosts: all
+  any_errors_fatal: true
+  roles:
+    - upload-kube-config
+    - upload-kubectl
+    - glusterfs-client
+
 - hosts: gfs-cluster
   any_errors_fatal: true
   roles:
     - k8s-module
-    - glusterfs
+    - glusterfs-server
 
 - hosts: kube-node[0]
   any_errors_fatal: true

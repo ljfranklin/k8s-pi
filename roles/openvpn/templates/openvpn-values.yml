@@ -1,13 +1,13 @@
 ---
 # manually built from https://github.com/ljfranklin/openvpn-docker
 image:
-  repository: {{ openvpn.image.split(":")[0] }}
-  tag: "{{ openvpn.image.split(":")[1] }}"
+  repository: {{ openvpn_image.split(":")[0] }}
+  tag: "{{ openvpn_image.split(":")[1] }}"
 service:
   type: LoadBalancer
   externalPort: 1194
   internalPort: 1194
-  loadBalancerIP: {{ ingress.openvpn_static_ip }}
+  loadBalancerIP: {{ ingress_openvpn_static_ip }}
   annotations:
     port-forwarding.lylefranklin.com/enable: "true"
 persistence:
@@ -15,8 +15,8 @@ persistence:
 podAnnotations:
   backup.ark.heptio.com/backup-volumes: certs
 openvpn:
-  OVPN_K8S_POD_NETWORK: {{ openvpn.pod_network }}
-  OVPN_K8S_POD_SUBNET: {{ openvpn.pod_subnet }}
-  OVPN_K8S_SVC_NETWORK: {{ openvpn.svc_network }}
-  OVPN_K8S_SVC_SUBNET: {{ openvpn.svc_subnet }}
+  OVPN_K8S_POD_NETWORK: {{ openvpn_pod_network }}
+  OVPN_K8S_POD_SUBNET: {{ openvpn_pod_subnet }}
+  OVPN_K8S_SVC_NETWORK: {{ openvpn_svc_network }}
+  OVPN_K8S_SVC_SUBNET: {{ openvpn_svc_subnet }}
   redirectGateway: true

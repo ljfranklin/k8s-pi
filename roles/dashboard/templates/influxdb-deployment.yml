@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: influxdb
-        image: {{ influxdb.image }}
+        image: {{ influxdb_image }}
         volumeMounts:
         - mountPath: /data
           name: influxdb-storage
