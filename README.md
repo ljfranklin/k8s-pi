@@ -368,6 +368,28 @@ Volume into the container.
 If the VPN container is deleted, the volume will be re-attached to the new container and
 the existing data will still be present.
 
+## Installing software with Helm
+
+While k8s is an incredibly flexible tool, it requires a lot of boilerplate configuration to get apps running.
+As an extreme example, the [deployment manifest](https://github.com/knative/serving/releases/download/v0.2.2/release.yaml)
+for the tool Knative is 17 thousand lines long.
+To avoid most of these boilerplate YAML files, the setup below includes a tool called [Helm](https://helm.sh/) to make
+installing software into k8s a bit easier.
+
+Helm lets you install software from a set of [charts](https://github.com/helm/charts).
+For example, to install a VPN server with helm you run:
+```
+helm install stable/openvpn
+```
+
+In a few seconds you have a running VPN server running in your cluster.
+To tweak some configuration options, you can create a YAML file containing the options defined in that
+[chart's README](https://github.com/helm/charts/tree/master/stable/openvpn#configuration):
+
+```
+helm install --values openvpn-options.yml stable/openvpn
+```
+
 ## Initial Setup
 
 Now that we understand the concepts, let's start deploying it.
@@ -802,20 +824,76 @@ key 'static-passw0rd'. This may change in future releases.
 
 ## Optional: Adding your own Ansible tasks
 
-TODO
+The components deployed so far are just a starting point.
+You'll want to deploy additional software into the cluster to suit your needs.
+To do this you can create new Ansible roles and include these roles in the `deploy.yml` playbook.
+You can start by copying an existing role ( e.g. `./submodules/k8s-pi/roles/openvpn`) into your own
+`./roles` directory and change the files to install a different piece of software.
 
 ## Optional: Building ARM images
 
-TODO
+You've worked hard to get to this point, but I've got some bad news.
+Many Helm charts do not support the ARM CPU architecture out-of-the-box.
+The vast majority of computers you interact with day-to-day use the `x86_64` architecture,
+also called `amd64`, while the Raspberry Pi's use the `arm` architecture, also called `armv7l`.
+
+Side note, the Raspberry Pi Model 3 B+ also supports `arm64` (a.k.a. `aarch64`), the 64 bit version of `arm`.
+However, since this model has less than 4GB of RAM you don't get the main benefit of using 64-bit software.
+As a result the Raspberry Pi focused OS distributions don't have a 64-bit version at this time.
+
+Docker images which are used to create k8s containers must be built to support each individual architecture.
+Many Helm charts include images which are built only for `x86_64` architecture.
+If you try to run these images in your Raspberry Pi cluster, the containers will fail to start with `Exec error`.
+You have a couple options to get an image built for `arm`:
+- Check whether the image maintainers created the `arm` image under a different name or tag, e.g. `k8s.gcr.io/defaultbackend-arm:1.4`
+- Google around to see whether someone else has uploaded an `arm` image to Dockerhub for that piece of software
+  - Disclaimer: use at your own risk when using software from someone other than the official project maintainers
+- Build the image yourself on a Raspberry Pi, here are the usual steps:
+  - clone the target project from GitHub onto the Raspberry Pi
+  - `cd` to the directory containing the Dockerfile
+  - Run `docker build -t YOUR_USERNAME/IMAGE-arm:latest .`
+  - Run `docker login` and paste in your Dockerhub credentials
+  - Run `docker push YOUR_USERNAME/IMAGE-arm:latest`
+  - Specify the new image name and tag in the helm values file, the name of the key will vary by chart
+- Open an issue asking the project maintainers to start publishing `arm` images
+
+If you want to publish a single Docker image which runs on multiple architectures,
+you can push an [image manifest](https://blog.docker.com/2017/11/multi-arch-all-the-things/).
+The [DockerHub official images](https://blog.docker.com/2014/06/announcing-docker-hub-and-official-repositories/) all support
+multiple architectures.
+This excellent [blog post](https://lobradov.github.io/Building-docker-multiarch-images/) shows how to build your own multi-arch
+images. The [dns-updater image](./dns-updater/docker) also shows this approach.
 
 ## Open Issues
 
-TODO
+I've manually built several ARM image which are included in the Ansible playbooks,
+ideally the project maintainers would publish official ARM images.
+Here's a list of issues tracking official ARM images:
+- Ark: https://github.com/heptio/ark/issues/720 & https://github.com/heptio/ark/issues/638
+- Heketi: https://github.com/heketi/heketi/issues/1470
+- Gluster: https://github.com/gluster/gluster-containers/issues/112
+- Helm: https://github.com/helm/helm/issues/3269
+- nginx-ingress: https://github.com/kubernetes/ingress-nginx/issues/3545
+- cert-manager: https://github.com/jetstack/cert-manager/issues/608
+- openvpn: hasn't been updated in 2 years
 
 ## Future work
 
-TODO
+Here's a few ideas that would be nice to implement going forward:
+- Switch to [Kubespray](https://github.com/kubernetes-sigs/kubespray) for base Ansible playbooks
+  - Like this project, Kubespray is a collection of Ansible roles to setup a k8s cluster, but doesn't support ARM out-of-the-box
+  - I tried for ~1 day to get Kubespray working but I got stuck on GlusterFS volumes hanging on mount
+- Support multi-master deployment of master node and etcd
+  - The above setup only has a single master k8s node
+  - If this node goes down you'll be unable to modify any cluster resources, luckily the workers can continue to serve application traffic
 
 ## Finished!
 
-TODO
+Please open an issue if you run into trouble and I'll try to help out.
+There are a lot of moving pieces here and it probably won't work on the first try.
+As frustrating as it can be to get this stuff working, it is equally delightful to use once you get it setup.
+PRs to docs and playbooks gladly accepted.
+
+Bon Voyage!
+
+![alt text](https://github.com/ashleymcnamara/gophers/raw/master/KUBERNETES_GOPHER.png "k8s gophers")
