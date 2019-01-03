@@ -67,12 +67,13 @@ Parts:
 |$40 |1x|[stacking Raspberry Pi case](http://amzn.to/2i9n0M5)|
 |$40 |1x|[USB-powered 8 port switch](http://amzn.to/2gNzLzi)|
 |$10 |1x|[SD card reader](https://www.amazon.com/UGREEN-Reader-Memory-Windows-Simultaneously/dp/B01EFPX9XA)|
+|$14 |1x|[32GB USB](https://www.amazon.com/gp/product/B00LFVITLK/)|
 |$139|1x|(optional) [Unifi Security Gateway (router)](https://www.ubnt.com/unifi-routing/usg/)|
 |-   |- |Optional, but parts of the guide assume a router with [BGP](https://en.wikipedia.org/wiki/Border_Gateway_Protocol) support|
 |$89 |1x|(optional) [Unifi Wireless AC Lite](https://store.ubnt.com/collections/wireless/products/unifi-ac-lite)|
 |$21 |1x|(optional) [Any 8 port switch](https://www.amazon.com/gp/product/B00A121WN6/)|
 |---|---|---|
-|$671|-|total|
+|$685|-|total|
 
 Yikes, that is a large price tag.
 Here's a few ways to cut down the cost:
@@ -220,13 +221,204 @@ forwarding rule to directly traffic on port `1194` to the MetalLB address `192.1
 which finally routes traffic into one of the VPN pods.
 Let's dive into the steps to make this happen automatically.
 
-##### Manage DNS records
+##### Managing DNS records
 
 For this setup, we'd like a single wildcard DNS record which resolves to our modem's public IP.
 This guide uses [CloudFlare](https://www.cloudflare.com/) as the DNS provider, but other
 providers should follow similar steps.
+We'd start by looking up our modem's public IP (hint: google "what's my ip").
+Then we'll go our DNS provider and create an [A record](https://support.dnsimple.com/articles/a-record/)
+for `*.cats-are-cool.com` pointing to our public IP and a Time-to-Live (TTL) of 2 minutes (shortest value you can).
+This means that requests for any subdomain of `cats-are-cool.com` (like `vpn.cats-are-cool.com`) will be routed
+to your modem/router.
+However, normally residential networks have ephemeral public IP addresses, meaning it can change
+at any time.
+Any we'd like to avoid manual creation of DNS records anyway.
+
+To handle the creating and updating of this wildcard record, the setup steps below include a
+`dns-updater` [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
+which creates the wildcard record if it doesn't exist and updates the IP address if your public
+IP has changed.
+This job runs every 5 minutes as a pod within the k8s cluster.
+
+> Note: the ansible steps listed below currently only support Cloudflare as a DNS provider, but can be tweaked to support
+other providers
+
+##### Managing port forwarding rules
+
+Next we'll need to add port forwarding rules to our router.
+Forwarding rules are a mapping of port to IP address.
+When the router receives a request on a given port, it will check its list of port forwarding rules
+to see if it has a rule for that port.
+If it does it will forward the traffic to the IP address listed in that rule.
+For the VPN example, we need to add a port forwarding for port `1194` and IP `192.168.1.200` (the MetalLB service IP).
+Normally you do this via your router's UI page, accessible at `http://192.168.1.1` usually.
+
+However, if you've got a Unifi router we can manage these port forwarding rules automatically.
+I created a custom k8s controller called the [port-forwarding-controller](https://github.com/ljfranklin/port-forwarding-controller).
+You deploy this controller into your cluster with credentials to talk to your Unifi router and
+it watches for new services similar to MetalLB.
+When the controller sees a new or updated service, it checks whether the Unifi controller has a forwarding rule
+matching that service's IP and port.
+If no rule exists, the controller will create it automatically.
+With this last bit in place, requests to `vpn.cats-are-cool.com` should be forwarded successfully into the VPN pods.
+
+> Again, the port-forwarding-controller currently only supports the Unifi API. PRs accepted!
+
+##### Handling HTTPS traffic
+
+In our VPN example, our service used the port `1194` and any traffic
+to that port went to the VPN pods.
+This worked well, but what if you wanted several different services to receive HTTPS traffic?
+You could have each one listen on a different port, but it'd be nice if they could all use the standard 443 port.
+To give a specific example, we'd like requests to `https://homepage.cats-are-cool.com`
+to go to a homepage app while requests to `https://passwords.cats-are-cool.com` to go to a password manager.
+
+To accomplish this, k8s provides an [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resource
+to create a mapping between requests and services.
+For example, you can create an Ingress resource that says any request containing the hostname `homepage.cats-are-cool.com`
+should be routed to the `homepage` Service.
+However, creating an Ingress resource doesn't do anything on its own, you need an ingress controller.
+We'll deploy the [ingress-nginx-controller](https://kubernetes.github.io/ingress-nginx/) to manage these objects for us.
+This controller watches for new and updated Ingress resources to build up a mapping of request options to target services.
+When the controller itself receives a request, it checks this mapping to see where to forward the traffic.
+This means the ingress controller is deployed between MetalLB and a target service like the homepage app.
+We'll need to create a Load Balancer service in front of the ingress controller so that a Load Balancer IP and port forwarding
+rules are created.
+
+Let's walk through an example HTTPS request end-to-end by visiting `https://homepage.cats-are-cool.com` from outside the network.
+As with the VPN example, this request reaches our modem's public IP which passes the traffic to the router.
+The router has a port forwarding rule to forward traffic on port `443` to the MetalLB address `192.168.1.201`.
+That address was assigned to the ingress-controller so MetalLB forwards the request to the ingress-controller pod.
+The ingress-controller sees that the target hostname of the request matches an Ingress resource
+whose target service is the `homepage` service.
+This match causes the controller to forward the traffic to one of the `homepage` pods.
+If no matching Ingress resource was found, the nginx-ingress-controller would use its default backend to return a 404.
+
+##### Generating TLS certificates
+
+Handling HTTPS traffic comes with another complication: generating TLS certificates.
+Certificates are used by HTTPS clients like web browsers to verify the identity of the requested website.
+Certificates are issued by Certificate Authorities (CAs) which are trusted by your browser.
+By default, most k8s HTTPS services will deploy with self-signed TLS certificates which are not trusted.
+Visiting a site with a self-signed certificate in your browser will show a scary "Connection is not secure" warning
+as your browser can't verify that site's identity.
+
+To automatically generate trusted certificates, we'll use a component called [cert-manager](https://github.com/jetstack/cert-manager)
+to get certificates from the free [Let's Encrypt CA](https://letsencrypt.org/).
+You start by deploying cert-manager with credentials for your DNS provider (we'll use CloudFlare again) as well as your Let's Encrypt email.
+Once deployed, cert-manager looks for Ingress resources with a `tls` key as shown [here](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls).
+For each `tls` key, cert-manager will make a certificate request to a Let's Encrypt server to generate a
+certificate for each DNS record listed in `tls.hosts`.
+The Let's Encrypt server will then ask cert-manager to prove it owns the requested DNS records by
+pushing a bit of DNS metadata to the DNS provider.
+Once Let's Encrypt verifies that the requested DNS metadata was added, it will return the requested certificates.
+cert-manager will then take that certificate and store it in a k8s [Secret](https://kubernetes.io/docs/concepts/configuration/secret/).
+This secret can later be mounted into a web server's container as a file.
+Let's Encrypt certificates are only valid for 90 days, but cert-manager will automatically renew any certificates that are
+nearing their expiration.
+
+> Note: Let's Encrypt has strict [rate limits](https://letsencrypt.org/docs/rate-limits/) for how many certificates it will generate.
+During your initial testing you can use the staging Let's Encrypt server (https://acme-staging-v02.api.letsencrypt.org/directory) rather
+than the production one to test your setup with fake certs until you get it working.
+
+## Storage
+
+With the previous steps in place, we're able to deploy stateless apps to our k8s cluster.
+But some apps need to store persistent data that is still present after a reboot.
+k8s defines a [Volume](https://kubernetes.io/docs/concepts/storage/volumes) resource to allow persistent data to be
+mounted into the container.
+
+On a single node bare metal k8s cluster, you could use a [hostPath](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath)
+volume which mounts a directory from the underlying worker machine into the container.
+We have a multi-node cluster so this won't work.
+
+In a multi-node cluster we could instead use a [Local Volume](https://kubernetes.io/docs/concepts/storage/volumes/#local).
+This is similar to a `hostPath` volume in that it mounts a disk or directory from the underlying host machine into the
+container, but this is supported in a multi-node cluster.
+This works, but still has a couple limitations:
+- Volumes must be manually created prior to deploying the app
+- All pods that use the volume are locked to a single worker node
+- If the worker goes down the app will be inaccessible until the worker comes back
+
+To overcome this limitation, we're going to use [Dynamic Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#dynamic).
+With Dynamic Volumes, a deployment can create a [Persistent Volume Claim (PVC)](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes)
+to request a volume of a given size.
+Your cluster's volume provider watches for these claims and creates volumes on demand.
+Once the volume is ready, the pod that requested it will be created and the volume will be mounted into the container.
+
+For this bare metal setup, we'll use [GlusterFS](https://docs.gluster.org/en/latest/) and [Heketi](https://github.com/heketi/heketi/wiki)
+as our volume provider.
+GlusterFS is a multi-node network filesystem and Heketi is an API layer to manage GlusterFS volumes.
+Later on we'll use the [gluster-kubernetes](https://github.com/gluster/gluster-kubernetes) project to configure
+these components to handle provisioning of Volumes in our cluster.
+In the steps shown below we'll plug a USB drive into one of our worker nodes.
+This worker will run the GlusterFS server and all persistent data will be stored on the USB drive.
+However, these volumes can be mounted over the network by containers running on other workers.
+If you want, you can buy a couple more USB drives and deploy GlusterFS onto multiple nodes
+to add replicate data and increase availability.
+
+Once we have GlusterFS+Heketi deployed, we can start using dynamic persistent volumes.
+Our VPN deployment might create a Persistent Volume Claim of size 5GB.
+Our volume provider will notice this new claim and create a 5GB volume in Gluster filesystem.
+Once the Volume is ready, k8s will continuing creating the VPN container and mount the
+Volume into the container.
+If the VPN container is deleted, the volume will be re-attached to the new container and
+the existing data will still be present.
 
 ## Initial Setup
+
+Now that we understand the concepts, let's start deploying it.
+The following steps assume you already have `git` and `python` installed.
+
+#### Ansible Introduction
+
+We'll use [Ansible](https://www.ansible.com/) to deploy the cluster.
+Ansible works by running commands over SSH from your workstation to each node
+in the Raspberry Pi cluster.
+Ansible has many features, but we'll introduce three basics here: inventory, roles, and playbooks.
+
+An inventory file lists the IP addresses of each machine you want to provision and
+groups each machine by responsibility.
+This file looks similar to the following:
+```
+[all]
+k8s-node1 ansible_host=192.168.1.100
+k8s-node2 ansible_host=192.168.1.101
+k8s-node3 ansible_host=192.168.1.102
+
+[kube-master]
+k8s-node1
+
+[kube-node]
+k8s-node2
+k8s-node3
+```
+This inventory file describes a three node k8s cluster.
+All the machines are listed at the top under the `all`,
+the first machine will serve as the master node,
+and the other two machines will be worker nodes.
+
+A role is a set of configuration options, files, and commands to run on a target machine.
+For example, the `upgrade-master` role will update k8s to the specified version while
+the `openvpn` role will deploy a VPN container into the cluster.
+A role will usually contain a `tasks/main.yml` file which lists which commands to run,
+a `templates` directory containing files to transfer to the target machine,
+and a `defaults/main.yml` file which lists supported configuration options.
+
+Finally, playbooks will tie the inventory and roles together.
+Here's a playbook example:
+```
+- hosts: all
+  roles:
+    - glusterfs-client
+
+- hosts: gfs-cluster
+  roles:
+    - glusterfs-server
+```
+This playbook tells Ansible to run the `glusterfs-client` role on all machines,
+then run the `glusterfs-server` role only on machines in the `gfs-cluster` inventory group.
 
 #### Create project
 
@@ -325,7 +517,7 @@ ssh_args          = -o ControlMaster=auto -o ControlPersist=30m -o ConnectionAtt
 EOF
 ```
 
-Install ansible + deps:
+Install Ansible + deps:
 
 ```
 sudo pip install -r submodules/k8s-pi/requirements.txt
