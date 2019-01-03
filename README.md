@@ -231,13 +231,13 @@ However this address is only resolvable from within our home network.
 For some services we'd like to access them from the office or when traveling.
 For example, pointing my VPN client to `vpn.cats-are-cool.com:1194` should route the traffic
 to my home modem's public IP address, which passes the traffic to my router, which has a port
-forwarding rule to directly traffic on port `1194` to the MetalLB address `192.168.1.200`,
+forwarding rule to direct traffic on port `1194` to the MetalLB address `192.168.1.200`,
 which finally routes traffic into one of the VPN pods.
 Let's dive into the steps to make this happen automatically.
 
 #### Managing DNS records
 
-For this setup, we'd like a single wildcard DNS record which resolves to our modem's public IP.
+For this setup, we'd like a single [wildcard DNS record](https://en.wikipedia.org/wiki/Wildcard_DNS_record) which resolves to our modem's public IP.
 This guide uses [CloudFlare](https://www.cloudflare.com/) as the DNS provider, but other
 providers should follow similar steps.
 We'd start by looking up our modem's public IP (hint: google "what's my ip").
@@ -247,12 +247,12 @@ This means that requests for any subdomain of `cats-are-cool.com` (like `vpn.cat
 to your modem/router.
 However, normally residential networks have ephemeral public IP addresses, meaning it can change
 at any time.
-Any we'd like to avoid manual creation of DNS records anyway.
+And we'd like to avoid manual creation of DNS records anyway.
 
 To handle the creating and updating of this wildcard record, the setup steps below include a
 `dns-updater` [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
-which creates the wildcard record if it doesn't exist and updates the IP address if your public
-IP has changed.
+which creates the wildcard record if it doesn't exist and updates the record's target IP
+address if your public IP has changed.
 This job runs every 5 minutes as a pod within the k8s cluster.
 
 > Note: the ansible steps listed below currently only support Cloudflare as a DNS provider, but can be tweaked to support
@@ -307,7 +307,6 @@ That address was assigned to the ingress-controller so MetalLB forwards the requ
 The ingress-controller sees that the target hostname of the request matches an Ingress resource
 whose target service is the `homepage` service.
 This match causes the controller to forward the traffic to one of the `homepage` pods.
-If no matching Ingress resource was found, the nginx-ingress-controller would use its default backend to return a 404.
 
 #### Generating TLS certificates
 
@@ -375,7 +374,7 @@ to add replicate data and increase availability.
 Once we have GlusterFS+Heketi deployed, we can start using dynamic persistent volumes.
 Our VPN deployment might create a Persistent Volume Claim of size 5GB.
 Our volume provider will notice this new claim and create a 5GB volume in Gluster filesystem.
-Once the Volume is ready, k8s will continuing creating the VPN container and mount the
+Once the Volume is ready, k8s will continue creating the VPN container and mount the
 Volume into the container.
 If the VPN container is deleted, the volume will be re-attached to the new container and
 the existing data will still be present.
@@ -426,13 +425,13 @@ Steps to setup hardware:
 - Plug the mini switch into the larger switch using another mini ethernet cable
 - Plug everything into AC power
 
-> Note: you'll need a wired ethernet connection on your workstation for now
+> Note: you'll need a wired ethernet connection on your workstation for now.
 Later steps will install the Unifi Controller into the k8s cluster which will allow you
 to setup the Wifi network.
 
 ### Ansible Introduction
 
-The following steps assume you already have `git` and `python` installed.
+> Note: The following steps assume you already have `git` and `python` installed.
 
 We'll use [Ansible](https://www.ansible.com/) to deploy the cluster.
 Ansible works by running commands over SSH from your workstation to each node
@@ -558,12 +557,12 @@ ssh k8s@192.168.1.105
 sudo wipefs -a /dev/sda # assumes USB drive has device ID /dev/sda
 ```
 
-> Note: you can add USB drives to multiple nodes if you wish for extra redundancy.
+> Note: you can add USB drives to multiple nodes for extra redundancy if you want.
 Remember to add these hosts under the `[gfs-cluster]` section in `hosts.ini` as shown below.
 
 ### Installing k8s
 
-Create `ansible.cfg` file in project root:
+Create an `ansible.cfg` file in project root:
 
 ```
 cat << EOF > ansible.cfg
@@ -584,7 +583,7 @@ Install Ansible + deps:
 sudo pip install -r submodules/k8s-pi/requirements.txt
 ```
 
-Create inventory file containing host information:
+Create an inventory file containing host information:
 
 ```
 mkdir inventory
@@ -651,10 +650,6 @@ ansible-playbook -i inventory/hosts.ini --extra-vars @secrets/secrets.yml bootst
 
 > Important! Running `bootstrap.yml` playbook a second time will wipe all data from the cluster.
 
-To upgrade k8s without wiping data, run the `upgrade.yml` playbook.
-
-To upgrade just the apps running on k8s, run the `deploy.yml` playbook.
-
 You should now have a running k8s cluster!
 To interact with the cluster, install the [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/) and
 copy the kubectl config file into your home directory:
@@ -664,6 +659,11 @@ cp ./secrets/admin.conf ~/.kube/config
 ```
 
 To check that it's working run `kubectl -n kube-system get pods`.
+
+This repo also includes two other playbooks: `upgrade.yml` and `deploy.yml`.
+To upgrade k8s without wiping data, run the `upgrade.yml` playbook.
+To upgrade just the apps running on k8s, run the `deploy.yml` playbook.
+
 
 ### Optional: Setup Unifi Controller
 
@@ -725,7 +725,9 @@ To force traffic to go through the router we can move all non-k8s machines over 
     - DHCP Range: 192.168.2.6 - 192.168.2.254
     - All other values default
     - Save
-- Leave the k8s switch plugged into LAN1 port on Unifi Gateway, but plug a second switch into LAN2
+- Unplug the mini switch from the larger switch
+- Unplug the larger switch from the router's LAN1 port and plug in into LAN2
+- Plug the mini switch into the LAN2 port
 - Connect all other machines (desktop, Wifi AP, etc.) into LAN2 switch
 - Verify that you can now route directly to BGP LB addresses:
   - `nc -v -z $ingress_nginx_static_ip 443`
@@ -759,7 +761,7 @@ With the default configuration, Ark will take a backup of all k8s resources and 
 This means you can delete your entire cluster, restore from a backup, and all pods, services, and persistent
 data will be restored just as it was when the last backup was taken.
 The Ark deployment includes a component called [Restic](https://restic.net/) to take backups of GlusterFS volumes.
-These backups will be stored a Google Cloud Storage (GCS) bucket although you can configure it with other
+These backups will be stored in a Google Cloud Storage (GCS) bucket although you can configure it with other
 backup services like S3.
 Ark will also automatically remove backups that are more than two weeks old.
 
@@ -774,6 +776,17 @@ ark create backup backup-01032019 --ttl 360h0m0s
 
 This command takes a backup of the entire cluster.
 Ark will automatically delete this backup after ~2 weeks (360 hours).
+You can check on the progress of the backup by running this command:
+
+```
+ark describe backup backup-01032019 --volume-details
+```
+
+List all backups stored on GCS:
+
+```
+ark get backups
+```
 
 ### Restoring entire cluster from backup
 
@@ -849,7 +862,7 @@ Many Helm charts do not support the ARM CPU architecture out-of-the-box.
 The vast majority of computers you interact with day-to-day use the `x86_64` architecture,
 also called `amd64`, while the Raspberry Pi's use the `arm` architecture, also called `armv7l`.
 
-Side note, the Raspberry Pi Model 3 B+ also supports `arm64` (a.k.a. `aarch64`), the 64 bit version of `arm`.
+> Side note, the Raspberry Pi Model 3 B+ also supports `arm64` (a.k.a. `aarch64`), the 64 bit version of `arm`.
 However, since this model has less than 4GB of RAM you don't get the main benefit of using 64-bit software.
 As a result the Raspberry Pi focused OS distributions don't have a 64-bit version at this time.
 
@@ -878,8 +891,8 @@ images. The [dns-updater image](./dns-updater/docker) also shows this approach.
 
 ## Open Issues
 
-I've manually built several ARM image which are included in the Ansible playbooks,
-ideally the project maintainers would publish official ARM images.
+I've manually built several ARM images which are included in the Ansible playbooks,
+but ideally the project maintainers would publish official ARM images.
 Here's a list of issues tracking official ARM images:
 - Ark: https://github.com/heptio/ark/issues/720 & https://github.com/heptio/ark/issues/638
 - Heketi: https://github.com/heketi/heketi/issues/1470
@@ -901,7 +914,7 @@ Here's a few ideas that would be nice to implement going forward:
 
 ## Finished!
 
-Please open an issue if you run into trouble and I'll try to help out.
+Please open an issue if you run into trouble.
 There are a lot of moving pieces here and it probably won't work on the first try.
 As frustrating as it can be to get this stuff working, it is equally delightful to use once you get it setup.
 PRs to docs and playbooks gladly accepted.
@@ -909,3 +922,5 @@ PRs to docs and playbooks gladly accepted.
 Bon Voyage!
 
 ![alt text](https://github.com/ashleymcnamara/gophers/raw/master/KUBERNETES_GOPHER.png "k8s gophers")
+
+(Gopher image by [Ashley McNamara](https://github.com/ashleymcnamara/gophers))
