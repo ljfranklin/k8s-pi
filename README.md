@@ -369,9 +369,34 @@ the existing data will still be present.
 ## Initial Setup
 
 Now that we understand the concepts, let's start deploying it.
-The following steps assume you already have `git` and `python` installed.
+
+#### Hardware Setup
+
+> Note: See picture at top of page as reference
+
+Steps to setup hardware:
+- Plug Unifi Gateway's WAN1 port into your modem
+- Plug Unifi Gateway's LAN1 port into the larger switch
+  - Note: the picture shows some components plugged into LAN2, we'll cover this in a later section
+- The Unifi AP should come with a Power-over-Ethernet (PoE) adapter
+  - Plug the LAN port of the adapter into the larger switch
+  - Plug the PoE port of the adapter into the Unifi AP
+- Assemble the Raspberry Pi's into the stacking case
+  - The case linked above includes a 7th level that we won't use
+- Plug USB cables into the charging dock but don't plug then into the Raspberry Pi's yet
+  - We'll power up the Pi's after we flash the SD cards
+- Plug the USB power cable of the mini switch into a USB port on one of the Pi's
+- Plug each Pi into the mini switch using the mini ethernet cables
+- Plug the mini switch into the larger switch using another mini ethernet cable
+- Plug everything into AC power
+
+> Note: you'll need a wired ethernet connection on your workstation for now
+Later steps will install the Unifi Controller into the k8s cluster which will allow you
+to setup the Wifi network.
 
 #### Ansible Introduction
+
+The following steps assume you already have `git` and `python` installed.
 
 We'll use [Ansible](https://www.ansible.com/) to deploy the cluster.
 Ansible works by running commands over SSH from your workstation to each node
@@ -649,15 +674,87 @@ To force traffic to go through the router we can move all non-k8s machines over 
   - `nc -v -z $ingress_nginx_static_ip 443`
   - Should say `Connection to 192.168.1.51 443 port [tcp/https] succeeded!` or similar
 
-## Backup/Restore
+## Optional: Access K8S Dashboard
 
 TODO
 
-After shutting down and restoring, ark was unable to take new backups.
+## Optional: Connect to cluster with VPN
+
+TODO
+
+## Optional: Backup/Restore
+
+It wouldn't be a real production-ish cluster if we didn't have automated backups.
+The Ansible playbooks deploy the [Ark](https://github.com/heptio/ark) k8s backup/restore utility.
+With the default configuration, Ark will take a backup of all k8s resources and persistent volumes once a day.
+This means you can delete your entire cluster, restore from a backup, and all pods, services, and persistent
+data will be restored just as it was when the last backup was taken.
+The Ark deployment includes a component called [Restic](https://restic.net/) to take backups of GlusterFS volumes.
+These backups will be stored a Google Cloud Storage (GCS) bucket although you can configure it with other
+backup services like S3.
+Ark will also automatically remove backups that are more than two weeks old.
+
+#### Take backup on-demand
+
+Backups are taken automatically once a day.
+To take one on-demand:
+
+```
+ark create backup backup-01032019 --ttl 360h0m0s
+```
+
+This command takes a backup of the entire cluster.
+Ark will automatically delete this backup after ~2 weeks (360 hours).
+
+#### Restoring entire cluster from backup
+
+First, get the name of the latest backup:
+
+```
+$ ark get backups
+NAME                           STATUS      CREATED                         EXPIRES   SELECTOR
+daily-backups-20190103070021   Completed   2019-01-02 23:00:21 -0800 PST   13d       <none>
+daily-backups-20190102070021   Completed   2019-01-01 23:00:21 -0800 PST   12d       <none>
+...
+```
+
+To start from a completely clean state,
+repeat the steps above to wide all the SD cards.
+Also remember to run `sudo wipefs -a /dev/sda` to clear out the USB drive used by GlusterFS.
+
+Comment out the `- import_playbook: deploy.yml` line of the `upgrade.yml` playbook to skip re-creating any k8s resources.
+Uncomment the line `backup_restore_only_mode: true` in `secrets/secrets.yml` so that Ark does add or delete any existing backups.
+
+Now run the `bootstrap.yml` playbook to recreate the cluster from scratch.
+Finally restore all k8s resources from backup:
+
+```
+ark create restore restore-01032019 --from-backup backup daily-backups-20190103070021
+```
+
+You can check on the restore progress with:
+
+```
+ark describe restore restore-01032019 --volume-details
+```
+
+Undo your changes to `upgrade.yml` and `secrets.yml` and re-run the `ark` role to allow it to resume taking daily backups.
+
+#### Restoring select deployments from backup
+
+If you'd like to restore only a subset of resources, e.g. only the VPN resources, specify a label selector on the restore:
+
+```
+ark create restore restore-01032019 --from-backup backup daily-backups-20190103070021 --label app=openvpn
+```
+
+#### Possible gotcha: Restic Repo shows NotReady
+
+At one point after shutting down and restoring, my Ark deployment was unable to take new backups.
 This was due to `ark restic repo get` returning `NotReady`.
 Turns out the Restic repository was still marked as "locked", possibly
 due to not shutting down the cluster gracefully.
-Running the following commands unlocks the repo:
+Running the following commands unlocked the repo:
 
 ```
 kubectl -n heptio-ark exec -it ark-restic-POD_ID /bin/sh
@@ -665,7 +762,23 @@ restic unlock -r gs:<VOLUME_BACKUP_BUCKET>:default
 # enter 'static-passw0rd' as the repo password
 ```
 
-This assumes you're using Google Cloud Storage as your backup provides,
-switch 'gs' to 's3' or similar depending on your provider.
-The 'static-passw0rd' key is [hardcoded](https://github.com/heptio/ark/blob/9f72cf9c614bb4dc02dfacae08c9dcd11fbb5eaa/pkg/restic/repository_keys.go#L33)
-in ark currently but this may change in future releases.
+At time of writing, volume backups are encrypted with the [hardcoded](https://github.com/heptio/ark/blob/9f72cf9c614bb4dc02dfacae08c9dcd11fbb5eaa/pkg/restic/repository_keys.go#L33)
+key 'static-passw0rd'. This may change in future releases.
+
+## Optional: Adding your own Ansible tasks
+
+TODO
+
+## Optional: Building ARM images
+
+TODO
+
+## Open Issues
+
+TODO
+
+## Future work
+
+TODO
+
+## Finished!
