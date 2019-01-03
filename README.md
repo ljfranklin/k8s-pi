@@ -6,21 +6,21 @@
 
 ## Table of contents:
 
-- What are we building?
-- Why though?
-- Hardware
-- Networking
-- Storage
-- Installing software with Helm
-- Initial Setup
-- Optional: Access K8S Dashboard
-- Optional: Connect to cluster with VPN
-- Optional: Backup/Restore
-- Optional: Adding your own Ansible tasks
-- Optional: Building ARM images
-- Open Issues
-- Future work
-- Finished!
+- [What are we building?](#table-of-contents)
+- [Why though?](#why-though)
+- [Hardware](#hardware)
+- [Networking](#networking)
+- [Storage](#storage)
+- [Installing software with Helm](#installing-software-with-helm)
+- [Initial Setup](#initial-setup)
+- [Optional: Access K8S Dashboard](#optional-access-k8s-dashboard)
+- [Optional: Connect to cluster with VPN](#optional-connect-to-cluster-with-vpn)
+- [Optional: Backup/Restore](#optional-backuprestore)
+- [Optional: Adding your own Ansible tasks](#optional-adding-your-own-ansible-tasks)
+- [Optional: Building ARM images](#optional-building-arm-images)
+- [Open Issues](#open-issues)
+- [Future work](#future-work)
+- [Finished!](#finished)
 
 ## What are we building?
 
@@ -78,7 +78,7 @@ Parts:
 |$32 |1x|[Anker PowerPort 6 Port USB Charging Hub](http://amzn.to/2zV6reM)|
 |$40 |1x|[stacking Raspberry Pi case](http://amzn.to/2i9n0M5)|
 |$40 |1x|[USB-powered 8 port switch](http://amzn.to/2gNzLzi)|
-|$10 |1x|[SD card reader](https://www.amazon.com/UGREEN-Reader-Memory-Windows-Simultaneously/dp/B01EFPX9XA)|
+|$10 |1x|[SD card reader](https://www.amazon.com/UGREEN-Reader-Memory-Windows-Simultaneously/dp/B01EFPX9XA) (if you don't already have one)|
 |$14 |1x|[32GB USB](https://www.amazon.com/gp/product/B00LFVITLK/)|
 |$139|1x|(optional) [Unifi Security Gateway (router)](https://www.ubnt.com/unifi-routing/usg/)|
 |-   |- |Optional, but parts of the guide assume a router with [BGP](https://en.wikipedia.org/wiki/Border_Gateway_Protocol) support|
@@ -127,7 +127,7 @@ We'll cover the specific installation steps down in the Initial Setup section, t
 When you deploy an app to k8s, it runs as one or more [pods](https://kubernetes.io/docs/concepts/workloads/pods/pod/) within the cluster.
 A pod is a group of one or more containers that should be grouped together on the same worker node.
 Each pod has a replica count which tells k8s how many copies to create of each pod.
-Since we specified three replicas in this example, k8s creates a VPN pod on each of the three workers.
+If we specify three replicas in this example, k8s would create a VPN pod on each of the three workers.
 
 After the deploy completes, we have three VPN server processes running but we need some way to route traffic to them.
 First we'll create a k8s [service](https://kubernetes.io/docs/concepts/services-networking/service/) to define how we will access the pods.
@@ -168,7 +168,8 @@ BGP stands for [Border Gateway Protocol](https://en.wikipedia.org/wiki/Border_Ga
 BGP allows two machines to exchange routing information, something like "IP 1.2.3.4 is one hop away from IP 5.6.7.8".
 This protocol is used on a global scale by Internet Service Providers (ISPs) to figure out how to route traffic between ISPs.
 But we're going to use the same protocol on a tiny scale to load balance traffic between our router and k8s worker nodes.
-We'll start by deploying MetalLB into our k8s cluster, configuring it with BGP options so that it can report route to our Unifi router.
+
+We'll start by deploying MetalLB into our k8s cluster, configuring it with BGP options so that it can report routes to our Unifi router.
 MetalLB will watch for new services of type `LoadBalancer`, assign an IP to that service, and start publishing routes for that IP.
 For example, let's say we had three workers (IPs 192.168.1.101, 192.168.1.102, and 192.168.1.103) and one VPN pod on the first worker.
 We then create a Load Balancer service, causing MetalLB to assign that service an IP address of 192.168.1.200.
@@ -186,7 +187,7 @@ This is because machines within the same subnet can route packets directly to ea
 the router is only needed to route packets between different subnets.
 Since the BGP route table is only present on the router, if the k8s cluster in on LAN1 and your laptop in on LAN1 you won't
 be able to route traffic to that Load Balancer IP.
-To overcome this, we broke our network into two subnets: LAN1 and LAN2.
+To overcome this, we divided our network into two subnets: LAN1 and LAN2.
 The k8s cluster lives in LAN1 and everything else lives in LAN2.
 This ensures that any requests from machines in LAN2 must go through the router which ensures the BGP routes are used.
 The k8s machines can also route traffic to the Load Balancer IPs as each node has a MetalLB process on it which
@@ -202,7 +203,8 @@ computer networks.
 This layer is concerned with how machines within a single subnet communicate with each other.
 The advantage of deploying MetalLB in Layer 2 mode rather than BGP mode is that Layer 2 mode doesn't require
 any special networking hardware.
-Let's replay our previous example with three worker nodes and one VPN pod on the first worker
+
+Let's replay our previous example with three worker nodes and one VPN pod on the first worker.
 MetalLB again assigns the service the IP 192.168.1.200.
 In Layer 2 mode, MetalLB will use the [Address Resolution Protocol (ARP)](https://en.wikipedia.org/wiki/Address_Resolution_Protocol)
 to advertise to other machines in that subnet that the first worker node also has the IP address 192.168.1.200 in addition to
