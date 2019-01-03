@@ -2,6 +2,8 @@
 
 ![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-cover.png "Hardware Pic")
 
+(Gopher image by [Ashley McNamara](https://github.com/ashleymcnamara/gophers))
+
 ## Table of contents:
 
 - What are we building?
@@ -61,11 +63,12 @@ Plus this setup is pretty delightful to use once you get it working.
 (see image above)
 
 Much of the hardware selection was taken from Scott Hanselman's excellent
-[How to Build a Kubernetes Cluster with ARM Raspberry Pi]https://www.hanselman.com/blog/HowToBuildAKubernetesClusterWithARMRaspberryPiThenRunNETCoreOnOpenFaas.aspx) guide.
+[How to Build a Kubernetes Cluster with ARM Raspberry Pi](https://www.hanselman.com/blog/HowToBuildAKubernetesClusterWithARMRaspberryPiThenRunNETCoreOnOpenFaas.aspx) guide.
 Check out his guide for some extra rationale for why he chose each part.
-TLDR buy tiny hardware that looks cute next to a stack of tiny Raspberry Pis.
+TLDR: buy tiny hardware that looks cute next to a stack of tiny Raspberry Pis.
 
 Parts:
+
 |Price|Count|Part|
 |---|---|---|
 |$210|6x|[Raspberry Pi 3 B+](https://www.pishop.us/product/raspberry-pi-3-model-b-plus/?src=raspberrypi)|
@@ -101,7 +104,7 @@ I'd still recommend skimming the guide, hopefully still some interesting learnin
 
 ## Networking
 
-#### Draw it out
+### Draw it out
 
 Here's a networking diagram of what we'll be building:
 
@@ -115,9 +118,9 @@ Let's zoom into LAN1 to examine networking within the k8s cluster:
 
 ![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-forwarding.png "Network Forwarding Diagram")
 
-Note: Switch present but not pictured, only 3 workers pictured
+> Note: Switch present but not pictured, only 3 workers pictured
 
-#### Example: deploy a VPN Service
+### Example: deploy a VPN Service
 
 For this example, let's say we wanted to deploy a VPN server into the k8s cluster.
 We'll cover the specific installation steps down in the Initial Setup section, this section will introduce the concepts.
@@ -148,7 +151,7 @@ General rule of thumb when choosing Service type:
 - Choose ClusterIP with ExternalIP if the service should be externally accessible but you don't have Load Balancer infrastructure in place and want a privileged port 
 - Choose LoadBalancer if you want traffic balanced across all worker nodes containing pods for that service
 
-#### Load Balancing with MetalLB
+### Load Balancing with MetalLB
 
 On a minimal k8s install we'd have to use either NodePort or ClusterIP+ExternalIP to expose a service externally.
 This has the drawback that a single worker node would receive all traffic for a given service.
@@ -157,7 +160,7 @@ To overcome this limitation we'll deploy [MetalLB](https://metallb.universe.tf/)
 MetalLB is a k8s load balancer implementation for bare metal setups like our Raspberry Pis.
 MetalLB has two operating modes: [Layer 2 mode](https://metallb.universe.tf/concepts/layer2/) and [BGP mode](https://metallb.universe.tf/concepts/bgp/)
 
-##### BGP Mode (recommended)
+#### BGP Mode (recommended)
 
 > Note: this section requires a Unifi Router or other router which supports BGP routing
 
@@ -191,7 +194,7 @@ adds `iptables` rules for each service to the host machine.
 You can also side-step this limitation by always sending requests to your modem's public IP address and adding a port
 forwarding rule to your router. We'll cover this setup shortly.
 
-##### Layer 2 Mode (use if your router doesn't have BGP support)
+#### Layer 2 Mode (use if your router doesn't have BGP support)
 
 Layer 2 refers to the [Data Link layer](https://en.wikipedia.org/wiki/Data_link_layer) of the
 [Open Systems Interconnection (OSI) model](https://en.wikipedia.org/wiki/OSI_model) of describing
@@ -219,7 +222,7 @@ but you can change that role to match the layer 2 configuration shown
 [here](https://metallb.universe.tf/configuration/#layer-2-configuration).
 Send me a PR to make it configurable if you do!
 
-#### Accessing services from outside the network
+### Accessing services from outside the network
 
 After deploying MetalLB, we now have an IP address for our service which load balances traffic.
 However this address is only resolvable from within our home network.
@@ -230,7 +233,7 @@ forwarding rule to directly traffic on port `1194` to the MetalLB address `192.1
 which finally routes traffic into one of the VPN pods.
 Let's dive into the steps to make this happen automatically.
 
-##### Managing DNS records
+#### Managing DNS records
 
 For this setup, we'd like a single wildcard DNS record which resolves to our modem's public IP.
 This guide uses [CloudFlare](https://www.cloudflare.com/) as the DNS provider, but other
@@ -253,7 +256,7 @@ This job runs every 5 minutes as a pod within the k8s cluster.
 > Note: the ansible steps listed below currently only support Cloudflare as a DNS provider, but can be tweaked to support
 other providers
 
-##### Managing port forwarding rules
+#### Managing port forwarding rules
 
 Next we'll need to add port forwarding rules to our router.
 Forwarding rules are a mapping of port to IP address.
@@ -274,7 +277,7 @@ With this last bit in place, requests to `vpn.cats-are-cool.com` should be forwa
 
 > Again, the port-forwarding-controller currently only supports the Unifi API. PRs accepted!
 
-##### Handling HTTPS traffic
+#### Handling HTTPS traffic
 
 In our VPN example, our service used the port `1194` and any traffic
 to that port went to the VPN pods.
@@ -304,7 +307,7 @@ whose target service is the `homepage` service.
 This match causes the controller to forward the traffic to one of the `homepage` pods.
 If no matching Ingress resource was found, the nginx-ingress-controller would use its default backend to return a 404.
 
-##### Generating TLS certificates
+#### Generating TLS certificates
 
 Handling HTTPS traffic comes with another complication: generating TLS certificates.
 Certificates are used by HTTPS clients like web browsers to verify the identity of the requested website.
@@ -401,7 +404,7 @@ helm install --values openvpn-options.yml stable/openvpn
 
 Now that we understand the concepts, let's start deploying it.
 
-#### Hardware Setup
+### Hardware Setup
 
 > Note: See picture at top of page as reference
 
@@ -425,7 +428,7 @@ Steps to setup hardware:
 Later steps will install the Unifi Controller into the k8s cluster which will allow you
 to setup the Wifi network.
 
-#### Ansible Introduction
+### Ansible Introduction
 
 The following steps assume you already have `git` and `python` installed.
 
@@ -476,7 +479,7 @@ Here's a playbook example:
 This playbook tells Ansible to run the `glusterfs-client` role on all machines,
 then run the `glusterfs-server` role only on machines in the `gfs-cluster` inventory group.
 
-#### Create project
+### Create project
 
 Create a new repository:
 
@@ -503,7 +506,7 @@ mkdir submodules
 git submodule add https://github.com/ljfranklin/k8s-pi.git ./submodules/k8s-pi
 ```
 
-#### Flash HypriotOS onto SD cards
+### Flash HypriotOS onto SD cards
 
 > Why HypriotOS?
 This Debian-based distribution is optimized for running Docker workloads such as a k8s cluster and
@@ -534,7 +537,7 @@ Unplug the microSD card and plug in the next one. Run the script again but incre
 
 Repeat the process until all cards have been flashed.
 
-#### Boot Raspberry Pi's
+### Boot Raspberry Pi's
 
 Plug all the cards into the Raspberry Pi's and attach the USB power cable to start them up.
 The Raspberry Pi's will install necessary packages on boot and will automatically reboot once to finish a kernel update.
@@ -556,7 +559,7 @@ sudo wipefs -a /dev/sda # assumes USB drive has device ID /dev/sda
 > Note: you can add USB drives to multiple nodes if you wish for extra redundancy.
 Remember to add these hosts under the `[gfs-cluster]` section in `hosts.ini` as shown below.
 
-#### Installing k8s
+### Installing k8s
 
 Create `ansible.cfg` file in project root:
 
@@ -660,7 +663,7 @@ cp ./secrets/admin.conf ~/.kube/config
 
 To check that it's working run `kubectl -n kube-system get pods`.
 
-#### Optional: Setup Unifi Controller
+### Optional: Setup Unifi Controller
 
 > Skip if you don't have a Unifi Router
 
@@ -704,7 +707,7 @@ visiting `https://unifi.$INGRESS_DOMAIN`.
 - Remove `$WORKER_IP` line from `/etc/hosts`
 - Done!
 
-#### Optional: Move non-k8s machines over to LAN2 to enable BGP routing
+### Optional: Move non-k8s machines over to LAN2 to enable BGP routing
 
 A limitation of this BGP routing setup is that machines on the 192.168.1.0/24 subnet cannot route to the BGP Load Balancer IP addresses.
 This is due to machines on the same subnet wanting to route traffic directly to the target machine rather than sending traffic through the router first.
@@ -758,7 +761,7 @@ These backups will be stored a Google Cloud Storage (GCS) bucket although you ca
 backup services like S3.
 Ark will also automatically remove backups that are more than two weeks old.
 
-#### Take backup on-demand
+### Take backup on-demand
 
 Backups are taken automatically once a day.
 To take one on-demand:
@@ -770,7 +773,7 @@ ark create backup backup-01032019 --ttl 360h0m0s
 This command takes a backup of the entire cluster.
 Ark will automatically delete this backup after ~2 weeks (360 hours).
 
-#### Restoring entire cluster from backup
+### Restoring entire cluster from backup
 
 First, get the name of the latest backup:
 
@@ -804,7 +807,7 @@ ark describe restore restore-01032019 --volume-details
 
 Undo your changes to `upgrade.yml` and `secrets.yml` and re-run the `ark` role to allow it to resume taking daily backups.
 
-#### Restoring select deployments from backup
+### Restoring select deployments from backup
 
 If you'd like to restore only a subset of resources, e.g. only the VPN resources, specify a label selector on the restore:
 
@@ -812,7 +815,7 @@ If you'd like to restore only a subset of resources, e.g. only the VPN resources
 ark create restore restore-01032019 --from-backup backup daily-backups-20190103070021 --label app=openvpn
 ```
 
-#### Possible gotcha: Restic Repo shows NotReady
+### Possible gotcha: Restic Repo shows NotReady
 
 At one point after shutting down and restoring, my Ark deployment was unable to take new backups.
 This was due to `ark restic repo get` returning `NotReady`.
