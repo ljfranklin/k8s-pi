@@ -2,6 +2,8 @@
 
 ![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi.jpg "Hardware Pic")
 
+TODO: update
+
 Table of contents:
 - What are we building?
 - Why though?
@@ -619,9 +621,24 @@ To upgrade k8s without wiping data, run the `upgrade.yml` playbook.
 
 To upgrade just the apps running on k8s, run the `deploy.yml` playbook.
 
+You should now have a running k8s cluster!
+To interact with the cluster, install the [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/) and
+copy the kubectl config file into your home directory:
+
+```
+cp ./secrets/admin.conf ~/.kube/config
+```
+
+To check that it's working run `kubectl -n kube-system get pods`.
+
 #### Optional: Setup Unifi Controller
 
 > Skip if you don't have a Unifi Router
+
+After following the above steps, a Unifi Controller should be running as a pod in your k8s cluster.
+The following steps are required to ensure the Router and AP are adopted by the Controller.
+After adopting both devices you will be able to configure settings like the Wifi network by
+visiting `https://unifi.$INGRESS_DOMAIN`.
 
 - Ensure all devices are plugged into LAN1 port of Unifi Gateway
   - We'll switch some devices over to LAN2 in a later step to enable BGP routing
@@ -638,6 +655,12 @@ To upgrade just the apps running on k8s, run the `deploy.yml` playbook.
   - `set-inform http://$FIRST_WORKER_IP:8080/inform`
   - Go to Controller UI and click Adopt on Devices tab
   - Wait for device to go from `Adopting` to `Provisioning` to `Connected` on Controller UI
+- Adopt the Unifi AP
+  - If the AP was not previously paired with another controller:
+    - The AP should appear in the Devices tab, click Adopt next to it in the UI
+  - If the AP was previously paired:
+    - Hold down the small Reset button on the AP with a paper clip to reset to factory default settings
+    - After reseting the AP should appear in the Devices tab, click Adopt
 - Add temporary port forwarding rule to bootstrap `port-forwarding-controller`:
   - Settings > Routing & Firewall > Port Forwarding > Create New Port Forwarding Rule
   - Name: tmp-k8s-ingress
@@ -676,11 +699,23 @@ To force traffic to go through the router we can move all non-k8s machines over 
 
 ## Optional: Access K8S Dashboard
 
-TODO
+A dashboard for your k8s cluster should now be available at `https://k8s.$INGRESS_DOMAIN`.
+This dashboard displays metrics like CPU and memory usage, as well as listing all deployed k8s resources.
+To get a login token, run `./submodules/k8s-pi/scripts/get-dashboard-token.sh`.
+Visit the dashboard URL, select Token on the login prompt, and paste in the token returned by the script.
 
 ## Optional: Connect to cluster with VPN
 
-TODO
+A VPN server is now available at `vpn.$INGRESS_DOMAIN`.
+To access it, generate a secret VPN config file by running this script:
+
+```
+./submodules/k8s-pi/scripts/generate-vpn-cert.sh vpn.$INGRESS_DOMAIN
+```
+
+This will create a `secrets/k8s.ovpn` file containing the necessary connection information.
+Pass this file to your VPN client to connect to k8s internal services and cluster IPs even when
+outside your home network.
 
 ## Optional: Backup/Restore
 
@@ -782,3 +817,5 @@ TODO
 TODO
 
 ## Finished!
+
+TODO
