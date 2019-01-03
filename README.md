@@ -2,16 +2,23 @@
 
 ![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi.jpg "Hardware Pic")
 
-TODO: update
+## Table of contents:
 
-Table of contents:
 - What are we building?
 - Why though?
 - Hardware
 - Networking
-- Flashing SD cards
-- Deploy k8s
-- Backup/Restore
+- Storage
+- Installing software with Helm
+- Initial Setup
+- Optional: Access K8S Dashboard
+- Optional: Connect to cluster with VPN
+- Optional: Backup/Restore
+- Optional: Adding your own Ansible tasks
+- Optional: Building ARM images
+- Open Issues
+- Future work
+- Finished!
 
 ## What are we building?
 
