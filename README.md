@@ -1,6 +1,6 @@
 # A "production-ish" Kubernetes cluster on Raspberry Pi
 
-![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi.png "Hardware Pic")
+![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-cover.png "Hardware Pic")
 
 ## Table of contents:
 
