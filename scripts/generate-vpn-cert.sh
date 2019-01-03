@@ -9,9 +9,8 @@ fi
 
 hostname="$1"
 
-script_dir="$( cd "$( dirname "$0" )" && pwd )"
-
-key_path="${script_dir}/../secrets/k8s.ovpn"
+key_path="secrets/k8s.ovpn"
+mkdir -p secrets
 
 if [ -f "${key_path}" ]; then
   echo "VPN config already exists at '${key_path}'. Delete it and try again."

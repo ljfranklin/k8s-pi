@@ -5,7 +5,7 @@ ingress_openvpn_static_ip:
 
 openvpn_image: ljfranklin/openvpn-docker-arm:latest
 # gives access to container network and host network
-openvpn_pod_network: 10.244.0.0
-openvpn_pod_subnet: 255.255.0.0
+openvpn_pod_network: 10.0.0.0
+openvpn_pod_subnet: 255.0.0.0
 openvpn_svc_network: "{{ (ansible_default_ipv4.address.split('.')[:3]|join('.')) + '.0' }}"
 openvpn_svc_subnet: 255.255.255.0
