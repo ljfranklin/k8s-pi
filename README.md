@@ -66,12 +66,13 @@ Parts:
 |$32 |1x|[Anker PowerPort 6 Port USB Charging Hub](http://amzn.to/2zV6reM)|
 |$40 |1x|[stacking Raspberry Pi case](http://amzn.to/2i9n0M5)|
 |$40 |1x|[USB-powered 8 port switch](http://amzn.to/2gNzLzi)|
+|$10 |1x|[SD card reader](https://www.amazon.com/UGREEN-Reader-Memory-Windows-Simultaneously/dp/B01EFPX9XA)|
 |$139|1x|(optional) [Unifi Security Gateway (router)](https://www.ubnt.com/unifi-routing/usg/)|
 |-   |- |Optional, but parts of the guide assume a router with [BGP](https://en.wikipedia.org/wiki/Border_Gateway_Protocol) support|
 |$89 |1x|(optional) [Unifi Wireless AC Lite](https://store.ubnt.com/collections/wireless/products/unifi-ac-lite)|
 |$21 |1x|(optional) [Any 8 port switch](https://www.amazon.com/gp/product/B00A121WN6/)|
 |---|---|---|
-|$661|-|total|
+|$671|-|total|
 
 Yikes, that is a large price tag.
 Here's a few ways to cut down the cost:
@@ -89,6 +90,141 @@ Even with these cost cutting steps, I realize the price will be a non-starter fo
 I'd still recommend skimming the guide, hopefully still some interesting learnings even if you don't deploy it yourself.
 
 ## Networking
+
+#### Draw it out
+
+Here's a networking diagram of what we'll be building:
+
+![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-networking.png "Network Diagram")
+
+We have split the machines into two subnetworks, LAN1 and LAN2.
+The k8s cluster will live in LAN1 and all other machines (desktop, laptop, phone, etc) will live on LAN2.
+The Router acts a bridge, allowing machines in LAN1 to talk to machines in LAN2 and vice versa.
+
+Let's zoom into LAN1 to examine networking within the k8s cluster:
+
+![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-forwarding.png "Network Forwarding Diagram")
+
+Note: Switch present but not pictured, only 3 workers pictured
+
+#### Example: deploy a VPN Service
+
+For this example, let's say we wanted to deploy a VPN server into the k8s cluster.
+We'll cover the specific installation steps down in the Initial Setup section, this section will introduce the concepts.
+When you deploy an app to k8s, it runs as one or more [pods](https://kubernetes.io/docs/concepts/workloads/pods/pod/) within the cluster.
+A pod is a group of one or more containers that should be grouped together on the same worker node.
+Each pod has a replica count which tells k8s how many copies to create of each pod.
+Since we specified three replicas in this example, k8s creates a VPN pod on each of the three workers.
+
+After the deploy completes, we have three VPN server processes running but we need some way to route traffic to them.
+First we'll create a k8s [service](https://kubernetes.io/docs/concepts/services-networking/service/) to define how we will access the pods.
+There are several types of services support by k8s, we'll cover a few in this guide:
+- [ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/#choosing-your-own-ip-address)
+  - (default) Service is given a cluster-internal IP address and is accessible only to other apps within the cluster
+- [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport)
+  - Service listens on a static port on the host machine, usually a high port like 30000
+- [LoadBalancer](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer)
+  - Service is exposed via some infrastructure load balancer service. Often this is a cloud-provider specific service like AWS ELBs
+- [External IPs](https://kubernetes.io/docs/concepts/services-networking/service/#external-ips)
+  - Used in conjunction with any of the previous service types
+  - Specifying an `externalIP` for a service will cause all worker nodes to start listening on that service's `port`.
+    If a worker receives traffic on that port and the destination IP of that packet matches the `externalIP` of a service,
+    the worker will route that packet to the service's pod via the kube-proxy process.
+  - Allows you to bind on low ports like 80 and 443 but requires a k8s user with elevated privileges
+
+General rule of thumb when choosing Service type:
+- Choose ClusterIP if the service will only be accessed from within the cluster
+- Choose NodePort if the service should be externally accessible but you don't have Load Balancer infrastructure in place and you don't need a privileged port like 80 or 443
+- Choose ClusterIP with ExternalIP if the service should be externally accessible but you don't have Load Balancer infrastructure in place and want a privileged port 
+- Choose LoadBalancer if you want traffic balanced across all worker nodes containing pods for that service
+
+#### Load Balancing with MetalLB
+
+On a minimal k8s install we'd have to use either NodePort or ClusterIP+ExternalIP to expose a service externally.
+This has the drawback that a single worker node would receive all traffic for a given service.
+If that worker goes down your service is inaccessible until that worker comes back up.
+To overcome this limitation we'll deploy [MetalLB](https://metallb.universe.tf/) to handle creation of LoadBalancer services.
+MetalLB is a k8s load balancer implementation for bare metal setups like our Raspberry Pis.
+MetalLB has two operating modes: [Layer 2 mode](https://metallb.universe.tf/concepts/layer2/) and [BGP mode](https://metallb.universe.tf/concepts/bgp/)
+
+##### BGP Mode (recommended)
+
+> Note: this section requires a Unifi Router or other router which supports BGP routing
+
+BGP stands for [Border Gateway Protocol](https://en.wikipedia.org/wiki/Border_Gateway_Protocol).
+BGP allows two machines to exchange routing information, something like "IP 1.2.3.4 is one hop away from IP 5.6.7.8".
+This protocol is used on a global scale by Internet Service Providers (ISPs) to figure out how to route traffic between ISPs.
+But we're going to use the same protocol on a tiny scale to load balance traffic between our router and k8s worker nodes.
+We'll start by deploying MetalLB into our k8s cluster, configuring it with BGP options so that it can report route to our Unifi router.
+MetalLB will watch for new services of type `LoadBalancer`, assign an IP to that service, and start publishing routes for that IP.
+For example, let's say we had three workers (IPs 192.168.1.101, 192.168.1.102, and 192.168.1.103) and one VPN pod on the first worker.
+We then create a Load Balancer service, causing MetalLB to assign that service an IP address of 192.168.1.200.
+MetalLB will then tell the router that shortest route to 192.168.1.200 is via 192.168.1.101 (the first worker's IP).
+If the router receives a request for 192.168.1.200, it will route that traffic to the first worker node and that worker will
+send the traffic to its VPN pod.
+If we then scale up to three VPN pods (one on each worker), MetalLB will tell the router that
+that shortest route to 192.168.1.200 is via either 192.168.1.101, 192.168.1.102, or 192.168.1.103.
+Since all routes have the same cost, the router will load balance requests across all three workers.
+We have load balancing in our home network!
+
+However, there in one gotcha to this setup:
+machines within the same subnet will not be able to resolve the Load Balancer IP addresses.
+This is because machines within the same subnet can route packets directly to each other without going through the router,
+the router is only needed to route packets between different subnets.
+Since the BGP route table is only present on the router, if the k8s cluster in on LAN1 and your laptop in on LAN1 you won't
+be able to route traffic to that Load Balancer IP.
+To overcome this, we broke our network into two subnets: LAN1 and LAN2.
+The k8s cluster lives in LAN1 and everything else lives in LAN2.
+This ensures that any requests from machines in LAN2 must go through the router which ensures the BGP routes are used.
+The k8s machines can also route traffic to the Load Balancer IPs as each node has a MetalLB process on it which
+adds `iptables` rules for each service to the host machine.
+You can also side-step this limitation by always sending requests to your modem's public IP address and adding a port
+forwarding rule to your router. We'll cover this setup shortly.
+
+##### Layer 2 Mode (use if your router doesn't have BGP support)
+
+Layer 2 refers to the [Data Link layer](https://en.wikipedia.org/wiki/Data_link_layer) of the
+[Open Systems Interconnection (OSI) model](https://en.wikipedia.org/wiki/OSI_model) of describing
+computer networks.
+This layer is concerned with how machines within a single subnet communicate with each other.
+The advantage of deploying MetalLB in Layer 2 mode rather than BGP mode is that Layer 2 mode doesn't require
+any special networking hardware.
+Let's replay our previous example with three worker nodes and one VPN pod on the first worker
+MetalLB again assigns the service the IP 192.168.1.200.
+In Layer 2 mode, MetalLB will use the [Address Resolution Protocol (ARP)](https://en.wikipedia.org/wiki/Address_Resolution_Protocol)
+to advertise to other machines in that subnet that the first worker node also has the IP address 192.168.1.200 in addition to
+its original IP of 192.168.1.101.
+Any machine within that subnet can then route traffic to 192.168.1.200.
+If we scale up to three VPN pods (one on each worker), MetalLB still only advertises the first worker's IP.
+But when that worker receives traffic with a destination IP of 192.168.1.200,
+it will load balance traffic across all pods in the cluster (even those on other workers) via the kube-proxy process.
+So it isn't true load balancing as a single worker node has to initially receive all the traffic for
+a given service, but traffic is balanced across all pods from there.
+MetalLB will also automatically failover if that worker node goes down, giving a different worker that
+service's IP.
+Unlike BGP mode, this setup requires all machines live on the same subnet.
+
+> Note: the ansible steps listed below currently only support BGP mode for MetalLB,
+but you can change that role to match the layer 2 configuration shown
+[here](https://metallb.universe.tf/configuration/#layer-2-configuration).
+Send me a PR to make it configurable if you do!
+
+#### Accessing services from outside the network
+
+After deploying MetalLB, we now have an IP address for our service which load balances traffic.
+However this address is only resolvable from within our home network.
+For some services we'd like to access them from the office or when traveling.
+For example, pointing my VPN client to `vpn.cats-are-cool.com:1194` should route the traffic
+to my home modem's public IP address, which passes the traffic to my router, which has a port
+forwarding rule to directly traffic on port `1194` to the MetalLB address `192.168.1.200`,
+which finally routes traffic into one of the VPN pods.
+Let's dive into the steps to make this happen automatically.
+
+##### Manage DNS records
+
+For this setup, we'd like a single wildcard DNS record which resolves to our modem's public IP.
+This guide uses [CloudFlare](https://www.cloudflare.com/) as the DNS provider, but other
+providers should follow similar steps.
 
 ## Initial Setup
 
@@ -266,7 +402,9 @@ To upgrade k8s without wiping data, run the `upgrade.yml` playbook.
 
 To upgrade just the apps running on k8s, run the `deploy.yml` playbook.
 
-#### Setup Unifi Controller
+#### Optional: Setup Unifi Controller
+
+> Skip if you don't have a Unifi Router
 
 - Ensure all devices are plugged into LAN1 port of Unifi Gateway
   - We'll switch some devices over to LAN2 in a later step to enable BGP routing
