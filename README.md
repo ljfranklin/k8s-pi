@@ -6,7 +6,7 @@
 
 ## Table of contents:
 
-- [What are we building?](#table-of-contents)
+- [Let's Build](#lets-build)
 - [Why though?](#why-though)
 - [Hardware](#hardware)
 - [Networking](#networking)
@@ -22,7 +22,7 @@
 - [Future work](#future-work)
 - [Finished!](#finished)
 
-## What are we building?
+## Let's Build
 
 This guide shows how to build a "production-ish" Kubernetes (k8s) cluster on Raspberry Pi hardware.
 There are many existing guides and tools available telling you how to deploy a "production-grade" k8s cluster, but
@@ -114,7 +114,8 @@ We have split the machines into two subnetworks, LAN1 and LAN2.
 The k8s cluster will live in LAN1 and all other machines (desktop, laptop, phone, etc) will live on LAN2.
 The Router acts a bridge, allowing machines in LAN1 to talk to machines in LAN2 and vice versa.
 
-Let's zoom into LAN1 to examine networking within the k8s cluster:
+Let's zoom into LAN1 to examine networking within the k8s cluster.
+Don't worry if you don't recognize all the terms immediately, we'll introduce them in the upcoming sections.
 
 ![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-forwarding.png "Network Forwarding Diagram")
 
@@ -407,7 +408,7 @@ Now that we understand the concepts, let's start deploying it.
 
 ### Hardware Setup
 
-> Note: See picture at top of page as reference
+![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-cover.png "Hardware Pic")
 
 Steps to setup hardware:
 - Plug Unifi Gateway's WAN1 port into your modem
