@@ -1,6 +1,6 @@
 # A "production-ish" Kubernetes cluster on Raspberry Pi
 
-![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-cover.png "Hardware Pic")
+<img src="https://storage.googleapis.com/ansible-assets/k8s-rpi-cover.png" alt="Hardware" title="Hardware" width="100%">
 
 (Gopher image by [Ashley McNamara](https://github.com/ashleymcnamara/gophers))
 
@@ -108,7 +108,7 @@ I'd still recommend skimming the guide, hopefully still some interesting learnin
 
 Here's a networking diagram of what we'll be building:
 
-![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-networking.png "Network Diagram")
+<img src="https://storage.googleapis.com/ansible-assets/k8s-rpi-networking.png" alt="Network Diagram" title="Network Diagram" width="100%">
 
 We have split the machines into two subnetworks, LAN1 and LAN2.
 The k8s cluster will live in LAN1 and all other machines (desktop, laptop, phone, etc) will live on LAN2.
@@ -117,7 +117,7 @@ The Router acts a bridge, allowing machines in LAN1 to talk to machines in LAN2 
 Let's zoom into LAN1 to examine networking within the k8s cluster.
 Don't worry if you don't recognize all the terms immediately, we'll introduce them in the upcoming sections.
 
-![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-forwarding.png "Network Forwarding Diagram")
+<img src="https://storage.googleapis.com/ansible-assets/k8s-rpi-forwarding.png" alt="Network Forwarding Diagram" title="Network Forwarding Diagram" width="100%">
 
 > Note: Switch present but not pictured, only 3 workers pictured
 
@@ -408,7 +408,7 @@ Now that we understand the concepts, let's start deploying it.
 
 ### Hardware Setup
 
-![alt text](https://storage.googleapis.com/ansible-assets/k8s-rpi-cover.png "Hardware Pic")
+<img src="https://storage.googleapis.com/ansible-assets/k8s-rpi-cover.png" alt="Hardware" title="Hardware" width="100%">
 
 Steps to setup hardware:
 - Plug Unifi Gateway's WAN1 port into your modem
@@ -922,6 +922,6 @@ PRs to docs and playbooks gladly accepted.
 
 Bon Voyage!
 
-![alt text](https://github.com/ashleymcnamara/gophers/raw/master/KUBERNETES_GOPHER.png "k8s gophers")
+<img src="https://github.com/ashleymcnamara/gophers/raw/master/KUBERNETES_GOPHER.png" alt="k8s gophers" title="k8s gophers" width="100%">
 
 (Gopher image by [Ashley McNamara](https://github.com/ashleymcnamara/gophers))
