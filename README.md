@@ -523,7 +523,7 @@ ssh-keygen -t rsa -b 4096 -C k8s -N '' -f ~/.ssh/id_rsa_k8s
 ssh-add ~/.ssh/id_rsa_k8s
 ```
 
-Plug a microSD card into your workstation (this example assumes the card has the device ID `/dev/sda`), then run the following command:
+Plug a microSD card into your workstation (this example assumes the card has the device ID `/dev/sda`, if using macOS run `diskutil list` to see device ID for microSD Card), then run the following command:
 
 ```
 ./submodules/k8s-pi/pi/provision.sh -d /dev/sda -n k8s-node1 -p "$(cat ~/.ssh/id_rsa_k8s.pub)" -i 192.168.1.100
